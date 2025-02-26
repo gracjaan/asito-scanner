@@ -1,12 +1,19 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { Platform, Image } from 'react-native';
+import { Platform, Image, TouchableOpacity } from 'react-native';
+import { useNavigation } from 'expo-router';
 
 import { HapticTab } from '@/components/HapticTab';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { ThemedText } from '@/components/ThemedText';
+
+type RootParamList = {
+  index: { hasPhotos?: boolean };
+  reports: undefined;
+};
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -48,10 +55,27 @@ export default function TabLayout() {
       }}>
       <Tabs.Screen
         name="index"
-        options={{
+        options={({ route }: { route: { params?: { hasPhotos?: boolean } } }) => ({
           title: 'Home',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
-        }}
+          headerRight: () => (
+            <TouchableOpacity 
+              style={{ marginRight: 16 }}
+              onPress={() => {
+                console.log('next button pressed');
+              }}
+              disabled={!route.params?.hasPhotos}
+            >
+              <ThemedText 
+                style={{ 
+                  opacity: route.params?.hasPhotos ? 1 : 0.5 
+                }}
+              >
+                Next
+              </ThemedText>
+            </TouchableOpacity>
+          ),
+        })}
       />
       <Tabs.Screen
         name="reports"

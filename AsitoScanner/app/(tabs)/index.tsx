@@ -1,74 +1,134 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import { StyleSheet, View, Image, TouchableOpacity, Text } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import { useState, useEffect } from 'react';
+import { useNavigation } from 'expo-router';
+import type { TabNavigationState } from '@react-navigation/native';
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
+import { IconSymbol } from '@/components/ui/IconSymbol';
 import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
 
 export default function HomeScreen() {
+  const [images, setImages] = useState<string[]>([]);
+  const navigation = useNavigation<{
+    setParams(params: { hasPhotos: boolean }): void;
+  }>();
+
+  useEffect(() => {
+    navigation.setParams({ hasPhotos: images.length > 0 });
+  }, [images]);
+
+  const takePhoto = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    
+    if (status !== 'granted') {
+      alert('Sorry, we need camera permissions to make this work!');
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setImages([...images, result.assets[0].uri]);
+    }
+  };
+
+  const renderSmallPlaceholders = () => {
+    if (images.length === 0) return null;
+
+    const remainingPlaceholders = Math.min(5 - images.length, 1);
+    return (
+      <View style={styles.smallPlaceholdersContainer}>
+        {images.slice(1).map((img, index) => (
+          <View key={index} style={styles.smallImageContainer}>
+            <Image source={{ uri: img }} style={styles.smallImage} />
+          </View>
+        ))}
+        {[...Array(remainingPlaceholders)].map((_, index) => (
+          <TouchableOpacity
+            key={`placeholder-${index}`}
+            style={styles.smallImageContainer}
+            onPress={takePhoto}
+          >
+            <IconSymbol name="camera" size={30} color="grey" />
+          </TouchableOpacity>
+        ))}
+      </View>
+    );
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <ThemedText style={styles.headerText}>take a photo of the staircase and main enterance</ThemedText>
+      </View>
+      <TouchableOpacity 
+        style={styles.imagePlaceholder} 
+        onPress={images.length === 0 ? takePhoto : undefined}
+      >
+        {images.length > 0 ? (
+          <Image source={{ uri: images[0] }} style={styles.image} />
+        ) : (
+          <IconSymbol name="camera" size={100} color="grey" />
+        )}
+      </TouchableOpacity>
+      {renderSmallPlaceholders()}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
+  container: {
+    flex: 1,
     alignItems: 'center',
+    padding: 16,
+  },
+  header: {
+    width: '100%',
+    paddingVertical: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerText: {
+    fontSize: 24,
+    fontWeight: '100',
+    textAlign: 'center',
+  },
+  imagePlaceholder: {
+    width: '100%',
+    height: '60%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: 'grey',
+    borderStyle: 'dashed',
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  smallPlaceholdersContainer: {
+    flexDirection: 'row',
+    marginTop: 16,
     gap: 8,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  smallImageContainer: {
+    width: 80,
+    height: 80,
+    borderWidth: 2,
+    borderColor: 'grey',
+    borderStyle: 'dashed',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  smallImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
   },
 });
