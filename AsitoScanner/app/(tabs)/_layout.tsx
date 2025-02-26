@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { Platform } from 'react-native';
+import { Platform, Image } from 'react-native';
 
 import { HapticTab } from '@/components/HapticTab';
 import { IconSymbol } from '@/components/ui/IconSymbol';
@@ -14,16 +14,36 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
+        tabBarActiveTintColor: '#FF5A00',
+        headerShown: true,
+        headerTitle: () => (
+          <Image
+            source={require('@/assets/images/asito-logo.png')}
+            style={{
+              height: 120,
+              width: 120,
+              resizeMode: 'contain',
+              padding: 10,
+            }}
+          />
+        ),
+        headerStyle: {
+          backgroundColor: Colors[colorScheme ?? 'light'].background,
+          borderBottomWidth: 2,
+          borderBottomColor: '#FF5A00',
+        },
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
         tabBarStyle: Platform.select({
           ios: {
-            // Use a transparent background on iOS to show the blur effect
             position: 'absolute',
+            borderTopWidth: 2,
+            borderTopColor: '#FF5A00',
           },
-          default: {},
+          default: {
+            borderTopWidth: 2,
+            borderTopColor: '#FF5A00',
+          },
         }),
       }}>
       <Tabs.Screen
@@ -34,10 +54,10 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="reports"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: 'Reports',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="doc.text.fill" color={color} />,
         }}
       />
     </Tabs>
