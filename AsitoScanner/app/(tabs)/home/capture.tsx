@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { ThemedText } from '@/components/ThemedText';
 
-export default function HomeScreen() {
+export default function CaptureScreen() {
   const [images, setImages] = useState<string[]>([]);
 
   const takePhoto = async () => {

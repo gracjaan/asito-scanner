@@ -23,7 +23,7 @@ const reports = [
 
 ];
 
-export default function ReportsScreen() {
+export default function BuildingPartsScreen() {
     return (
         <View style={styles.container}>
             <FlatList
