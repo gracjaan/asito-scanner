@@ -6,6 +6,7 @@ import { useNavigation, useRouter, useRootNavigationState } from 'expo-router';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { ThemedText } from '@/components/ThemedText';
 
+
 export default function HomeScreen() {
   const [images, setImages] = useState<string[]>([]);
   const router = useRouter();
