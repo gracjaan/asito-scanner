@@ -5,7 +5,7 @@ import { useNavigation, useRouter, useRootNavigationState } from 'expo-router';
 
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { ThemedText } from '@/components/ThemedText';
-
+import { sendImageToOpenAI } from '../../services/openaiService';
 
 export default function HomeScreen() {
   const [images, setImages] = useState<string[]>([]);
@@ -35,14 +35,28 @@ export default function HomeScreen() {
     });
 
     if (!result.canceled) {
-      const newImages = [...images, result.assets[0].uri];
+      // Grab the first image URI from result
+      const photoUri = result.assets[0].uri;
+
+      // Update your images state
+      const newImages = [...images, photoUri];
       setImages(newImages);
 
+      // Update navigation params if needed
       if (navigationState?.key) {
         router.setParams({ hasPhotos: newImages.length > 0, images: newImages });
       }
+
+      // Send the captured image to OpenAI
+      try {
+        const openAIResponse = await sendImageToOpenAI(photoUri);
+        console.log('OpenAI Response:', openAIResponse);
+      } catch (error) {
+        console.error('Error processing image with OpenAI:', error);
+      }
     }
   };
+
 
   return (
     <View style={styles.container}>

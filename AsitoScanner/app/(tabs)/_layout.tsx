@@ -28,11 +28,6 @@ export default function TabLayout() {
       console.log("No image to send.");
       return;
     }
-
-    //OpenAI
-    console.log("Sending last captured image to OpenAI:", latestImage);
-    const response = await sendImageToOpenAI(latestImage);
-    console.log("OpenAI Response:", response);
   };
 
   return (
