@@ -7,7 +7,9 @@ import { router } from 'expo-router';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { ThemedText } from '@/components/ThemedText';
 import { useSurvey } from '@/context/SurveyContext';
-import { SubmitModal } from '@/components/SubmitModal';
+import {sendImagesToOpenAIWithBase64} from '@/services/openaiService';
+import {SubmitModal} from "@/components/SubmitModal";
+
 
 const { width } = Dimensions.get('window');
 
@@ -118,17 +120,35 @@ export default function CaptureScreen() {
     }
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
+
     markQuestionAsCompleted(questions[currentQuestionIndex].id);
-    
+
+    const currentImages = questions[currentQuestionIndex]?.images || [];
+
+    if (currentImages.length > 0) {
+
+      try {
+        await sendImagesToOpenAIWithBase64(currentImages);
+
+      } catch (error) {
+        console.error("Error sending images to OpenAI:", error);
+      }
+    } else {
+      console.log("No images found for this question.");
+    }
+
+    // Move to the next question
     if (currentQuestionIndex === questions.length - 1) {
       setShowSubmitModal(true);
       return;
     }
-    
+
     const nextIndex = (currentQuestionIndex + 1) % questions.length;
     navigateToQuestion(nextIndex);
   };
+
+
 
   const handlePrevious = () => {
     const prevIndex = (currentQuestionIndex - 1 + questions.length) % questions.length;
