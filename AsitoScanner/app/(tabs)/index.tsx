@@ -49,6 +49,7 @@ export default function HomeScreen() {
 
       // Send the captured image to OpenAI
       try {
+        console.log('Sent the image');
         const openAIResponse = await sendImageToOpenAI(photoUri);
         console.log('OpenAI Response:', openAIResponse);
       } catch (error) {
