@@ -2,6 +2,7 @@ import { StyleSheet, FlatList, View, TouchableOpacity } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { router } from 'expo-router';
+import { sendImageToOpenAI } from '../../services/openaiService';
 
 const reports = [
     {
