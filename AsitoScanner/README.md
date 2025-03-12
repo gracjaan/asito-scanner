@@ -76,10 +76,10 @@ Once all areas are inspected, the app will automatically generate a **detailed r
 ---
 
 ## **Best Practices for Accurate Inspections**  
-✅ **Take well-lit, clear images** – Avoid blurry or dark photos.  
-✅ **Capture the full area** – Ensure key elements (e.g., windows, floors, walls) are visible.  
-✅ **Maintain a stable internet connection** – AI analysis requires connectivity.  
-✅ **Update the app regularly** – Get the latest features and improvements.  
+- **Take well-lit, clear images** – Avoid blurry or dark photos.  
+- **Capture the full area** – Ensure key elements (e.g., windows, floors, walls) are visible.  
+- **Maintain a stable internet connection** – AI analysis requires connectivity.  
+- **Update the app regularly** – Get the latest features and improvements.  
 
 ---
 ## **Troubleshooting**  
