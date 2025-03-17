@@ -15,9 +15,17 @@ const encodeImage = async (imageUri: string): Promise<string> => {
   }
 };
 
-// Function to send multiple images to OpenAI with the correct request structure
-export const sendImagesToOpenAIWithBase64 = async (imageUris: string[]) => {
-  console.log(`Sending ${imageUris.length} images to OpenAI for analysis`);
+export interface OpenAIAnalysisResponse {
+  answer: string;
+  isComplete: boolean;
+  suggestedAction?: string;
+}
+
+export const sendImagesToOpenAIWithBase64 = async (
+  imageUris: string[],
+  analyticalQuestion: string
+): Promise<OpenAIAnalysisResponse | null> => {
+  console.log(`Sending ${imageUris.length} images to OpenAI for analysis with question: "${analyticalQuestion}"`);
 
   if (!imageUris || imageUris.length === 0) {
     console.error("No images provided.");
@@ -30,8 +38,8 @@ export const sendImagesToOpenAIWithBase64 = async (imageUris: string[]) => {
 
     // Filter out any failed encodings
     const validImages = encodedImages
-        .filter(base64 => base64 !== "")
-        .map(base64 => ({ type: "image_url", image_url: { url: `data:image/jpeg;base64,${base64}` } }));
+      .filter(base64 => base64 !== "")
+      .map(base64 => ({ type: "image_url", image_url: { url: `data:image/jpeg;base64,${base64}` } }));
 
     if (validImages.length === 0) {
       console.error("All image encodings failed.");
@@ -40,36 +48,67 @@ export const sendImagesToOpenAIWithBase64 = async (imageUris: string[]) => {
 
     console.log(`Successfully encoded ${validImages.length} images.`);
 
-    // Construct OpenAI API request payload (matching the required format)
+    const structuredPrompt = `
+You are an expert building inspector assistant. Please analyze the provided images to answer this specific question: "${analyticalQuestion}"
+
+Respond with a JSON object in the following format:
+{
+  "answer": "Your detailed analysis answering the question directly. Be specific about what you see in the images.",
+  "isComplete": true/false (whether the images provide enough information to fully answer the question),
+  "suggestedAction": "If isComplete is false, provide a specific suggestion for what additional photos are needed"
+}
+
+For the "answer" field, focus specifically on answering the analytical question. Be thorough but concise.
+For the "isComplete" field, set to true only if you can confidently answer the question based on the provided images.
+For the "suggestedAction" field, provide clear guidance on what specific additional photos would help if the current ones are insufficient.
+
+Ensure your response is ONLY the JSON object with no additional text before or after.
+`;
+
     const payload = {
       model: "gpt-4o-mini",
       messages: [
         {
           role: "user",
           content: [
-            { type: "text", text: "Describe the image" },
+            { type: "text", text: structuredPrompt },
             ...validImages
           ]
         }
       ],
-      max_tokens: 300,
+      max_tokens: 500,
+      response_format: { type: "json_object" }
     };
 
     // Send request to OpenAI
     const response = await axios.post(
-        'https://api.openai.com/v1/chat/completions',
-        payload,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${OPENAI_API_KEY}`,
-          },
-          timeout: 30000,
-        }
+      'https://api.openai.com/v1/chat/completions',
+      payload,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        },
+        timeout: 30000,
+      }
     );
 
-    console.log("OpenAI Response:", response.data.choices[0].message.content);
-    return response.data;
+    const responseContent = response.data.choices[0].message.content;
+    console.log("OpenAI Response:", responseContent);
+
+    try {
+      // Parse the JSON response
+      const parsedResponse: OpenAIAnalysisResponse = JSON.parse(responseContent);
+      return parsedResponse;
+    } catch (parseError) {
+      console.error("Error parsing OpenAI response as JSON:", parseError);
+      // Fallback response if parsing fails
+      return {
+        answer: responseContent,
+        isComplete: false,
+        suggestedAction: "Please take clearer photos as the analysis couldn't be properly processed."
+      };
+    }
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
       console.error("Error sending images to OpenAI:", error.response?.data || error.message);
