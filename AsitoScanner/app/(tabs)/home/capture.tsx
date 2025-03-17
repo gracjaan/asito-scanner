@@ -1,4 +1,4 @@
-import { StyleSheet, View, Image, TouchableOpacity, ActivityIndicator, Animated, Dimensions } from 'react-native';
+import { StyleSheet, View, Image, TouchableOpacity, ActivityIndicator, Animated, Dimensions, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { useState, useEffect, useRef } from 'react';
@@ -7,8 +7,9 @@ import { router } from 'expo-router';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { ThemedText } from '@/components/ThemedText';
 import { useSurvey } from '@/context/SurveyContext';
-import {sendImagesToOpenAIWithBase64} from '@/services/openaiService';
+import {sendImagesToOpenAIWithBase64, OpenAIAnalysisResponse} from '@/services/openaiService';
 import {SubmitModal} from "@/components/SubmitModal";
+import { saveReport } from '@/services/storageService';
 
 
 const { width } = Dimensions.get('window');
@@ -26,15 +27,21 @@ export default function CaptureScreen() {
     setCurrentQuestionIndex,
     addImageToQuestion,
     markQuestionAsCompleted,
-    setAnswerForQuestion
+    setAnswerForQuestion,
+    userName,
+    surveyDate,
+    surveyStatus,
+    surveyDescription
   } = useSurvey();
 
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysisProgress, setAnalysisProgress] = useState(0);
-  const [analysisComplete, setAnalysisComplete] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
+  const [analysisProgress, setAnalysisProgress] = useState(0);
+  const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
+  const progressAnim = useRef(new Animated.Value(0)).current;
   
-  const currentQuestion = questions[currentQuestionIndex]?.text || '';
+  const currentDisplayText = questions[currentQuestionIndex]?.displayText || questions[currentQuestionIndex]?.text || '';
+  const currentAnalyticalQuestion = questions[currentQuestionIndex]?.analyticalQuestion || questions[currentQuestionIndex]?.text || '';
   
   const currentImages = questions[currentQuestionIndex]?.images || [];
 
@@ -64,6 +71,47 @@ export default function CaptureScreen() {
     ]).start();
   }, []);
 
+  // Animation for the progress bar
+  useEffect(() => {
+    if (isAnalyzing) {
+      // Reset progress animation
+      progressAnim.setValue(0);
+      setAnalysisProgress(0);
+      
+      // Animate to 90% quickly, then slow down
+      Animated.timing(progressAnim, {
+        toValue: 0.9,
+        duration: 6000,
+        useNativeDriver: false,
+      }).start();
+      
+      // Update the progress state for display
+      const interval = setInterval(() => {
+        setAnalysisProgress(prev => {
+          if (prev < 90) {
+            return prev + 5;
+          }
+          clearInterval(interval);
+          return prev;
+        });
+      }, 300);
+      
+      return () => clearInterval(interval);
+    } else if (analysisProgress > 0) {
+      // Complete the progress animation when analysis is done
+      Animated.timing(progressAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: false,
+      }).start(() => {
+        setTimeout(() => {
+          setAnalysisProgress(0);
+        }, 500);
+      });
+      setAnalysisProgress(100);
+    }
+  }, [isAnalyzing]);
+
   const updateDotStyles = (newIndex: number) => {
     setDotStyles(prev =>
       prev.map((style, i) => {
@@ -77,26 +125,6 @@ export default function CaptureScreen() {
       })
     );
   };
-
-  // simulate AI analysis progress
-  useEffect(() => {
-    if (isAnalyzing) {
-      const interval = setInterval(() => {
-        setAnalysisProgress((prev) => {
-          const newProgress = prev + 0.1;
-          if (newProgress >= 1) {
-            clearInterval(interval);
-            setIsAnalyzing(false);
-            setAnalysisComplete(true);
-            return 1;
-          }
-          return newProgress;
-        });
-      }, 200);
-
-      return () => clearInterval(interval);
-    }
-  }, [isAnalyzing]);
 
   const takePhoto = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
@@ -116,39 +144,67 @@ export default function CaptureScreen() {
     if (!result.canceled) {
       const imageUri = result.assets[0].uri;
       addImageToQuestion(questions[currentQuestionIndex].id, imageUri);
-      setIsAnalyzing(true);
+      // Clear any previous feedback when a new image is added
+      setFeedbackMessage(null);
     }
   };
 
   const handleNext = async () => {
-
-    markQuestionAsCompleted(questions[currentQuestionIndex].id);
-
     const currentImages = questions[currentQuestionIndex]?.images || [];
 
-    if (currentImages.length > 0) {
-
-      try {
-        await sendImagesToOpenAIWithBase64(currentImages);
-
-      } catch (error) {
-        console.error("Error sending images to OpenAI:", error);
-      }
-    } else {
-      console.log("No images found for this question.");
-    }
-
-    // Move to the next question
-    if (currentQuestionIndex === questions.length - 1) {
-      setShowSubmitModal(true);
+    if (currentImages.length === 0) {
+      Alert.alert(
+        "No Images",
+        "Please take at least one photo before proceeding.",
+        [{ text: "OK" }]
+      );
       return;
     }
 
-    const nextIndex = (currentQuestionIndex + 1) % questions.length;
-    navigateToQuestion(nextIndex);
+    setIsAnalyzing(true);
+    try {
+      const response = await sendImagesToOpenAIWithBase64(
+        currentImages, 
+        currentAnalyticalQuestion
+      );
+
+      if (response) {
+        // Save the answer to the question
+        setAnswerForQuestion(questions[currentQuestionIndex].id, response.answer);
+
+        if (response.isComplete) {
+          // If the response indicates the images are sufficient, mark as completed and proceed
+          markQuestionAsCompleted(questions[currentQuestionIndex].id);
+          setFeedbackMessage(null);
+
+          if (currentQuestionIndex === questions.length - 1) {
+            setShowSubmitModal(true);
+          } else {
+            const nextIndex = (currentQuestionIndex + 1) % questions.length;
+            navigateToQuestion(nextIndex);
+          }
+        } else {
+          // If more images are needed, show feedback to the user
+          setFeedbackMessage(response.suggestedAction || "Please take more detailed photos.");
+        }
+      } else {
+        Alert.alert(
+          "Analysis Failed",
+          "There was a problem analyzing your images. Please try again.",
+          [{ text: "OK" }]
+        );
+      }
+    } catch (error) {
+      console.error("Error sending images to OpenAI:", error);
+      Alert.alert(
+        "Error",
+        "An error occurred while analyzing your images. Please try again.",
+        [{ text: "OK" }]
+      );
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
-
-
 
   const handlePrevious = () => {
     const prevIndex = (currentQuestionIndex - 1 + questions.length) % questions.length;
@@ -174,9 +230,8 @@ export default function CaptureScreen() {
         useNativeDriver: true,
       })
     ]).start(() => {
-      setAnalysisProgress(0);
-      setAnalysisComplete(false);
       setIsAnalyzing(false);
+      setFeedbackMessage(null);
 
       setCurrentQuestionIndex(newIndex);
 
@@ -200,9 +255,42 @@ export default function CaptureScreen() {
     });
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setShowSubmitModal(false);
-    router.push('/home/final-report');
+    
+    try {
+      // Create a unique ID for the report
+      const reportId = `report-${Date.now()}`;
+      
+      // Save the completed survey to localStorage
+      await saveReport({
+        id: reportId,
+        scope: 'Building Inspection', // Default scope, could be customizable
+        date: surveyDate,
+        status: surveyStatus,
+        userName: userName,
+        description: surveyDescription,
+        questions: questions.map(q => ({
+          id: q.id,
+          text: q.text,
+          displayText: q.displayText || q.text,
+          analyticalQuestion: q.analyticalQuestion || q.text,
+          answer: q.answer || '',
+          images: q.images,
+          completed: q.completed
+        }))
+      });
+      
+      console.log('Survey saved successfully');
+      router.push('/home/final-report');
+    } catch (error) {
+      console.error('Error saving survey:', error);
+      Alert.alert(
+        'Error',
+        'There was a problem saving your survey. Please try again.',
+        [{ text: 'OK' }]
+      );
+    }
   };
 
   const renderSmallPlaceholders = () => {
@@ -229,6 +317,38 @@ export default function CaptureScreen() {
     );
   };
 
+  // Render the analysis overlay with progress bar
+  const renderAnalysisOverlay = () => {
+    if (!isAnalyzing && analysisProgress === 0) return null;
+    
+    const progressWidth = progressAnim.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['0%', '100%'],
+    });
+    
+    return (
+      <View style={styles.overlayContainer}>
+        <View style={styles.overlayContent}>
+          <ActivityIndicator size="large" color="#FF5A00" />
+          <ThemedText style={styles.overlayText}>
+            Analyzing images...
+          </ThemedText>
+          <View style={styles.progressBarContainer}>
+            <Animated.View 
+              style={[
+                styles.progressBar,
+                { width: progressWidth }
+              ]} 
+            />
+          </View>
+          <ThemedText style={styles.progressText}>
+            {analysisProgress}%
+          </ThemedText>
+        </View>
+      </View>
+    );
+  };
+
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
       <View style={styles.container}>
@@ -237,6 +357,8 @@ export default function CaptureScreen() {
           onCancel={() => setShowSubmitModal(false)}
           onSubmit={handleSubmit}
         />
+
+        {renderAnalysisOverlay()}
 
         <Animated.View
           style={[
@@ -248,32 +370,28 @@ export default function CaptureScreen() {
           ]}
         >
           <View style={styles.header}>
-            <ThemedText style={styles.headerText}>{currentQuestion}</ThemedText>
+            <ThemedText style={styles.headerText}>{currentDisplayText}</ThemedText>
           </View>
 
           <TouchableOpacity
             style={styles.imagePlaceholder}
             onPress={currentImages.length === 0 ? takePhoto : undefined}
-            disabled={isAnalyzing}
           >
             {currentImages.length > 0 ? (
               <Image source={{ uri: currentImages[0] }} style={styles.image} />
             ) : (
               <IconSymbol name="camera" size={100} color="grey" />
             )}
-
-            {isAnalyzing && (
-              <View style={styles.analysisOverlay}>
-                <ActivityIndicator size="large" color="#FF5A00" animating={true} />
-                <ThemedText style={styles.analysisText}>Analyzing image...</ThemedText>
-                <View style={styles.progressBarContainer}>
-                  <View style={[styles.progressBar, { width: `${analysisProgress * 100}%` }]} />
-                </View>
-              </View>
-            )}
           </TouchableOpacity>
 
           {renderSmallPlaceholders()}
+
+          {feedbackMessage && (
+            <View style={styles.feedbackContainer}>
+              <IconSymbol name="exclamationmark.triangle" size={24} color="#FF5A00" />
+              <ThemedText style={styles.feedbackText}>{feedbackMessage}</ThemedText>
+            </View>
+          )}
 
           <View style={styles.progressContainer}>
             <View style={styles.progressDotsContainer}>
@@ -306,6 +424,7 @@ export default function CaptureScreen() {
               <TouchableOpacity 
                 style={styles.backButton} 
                 onPress={handleNext}
+                disabled={isAnalyzing}
               >
                 <IconSymbol name="chevron.right" size={24} color="#FFFFFF" />
               </TouchableOpacity>
@@ -365,7 +484,6 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: 'grey',
     borderStyle: 'dashed',
-    position: 'relative',
   },
   image: {
     width: '100%',
@@ -390,34 +508,6 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     resizeMode: 'cover',
-  },
-  analysisOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  analysisText: {
-    color: 'white',
-    fontSize: 18,
-    marginTop: 16,
-    marginBottom: 16,
-  },
-  progressBarContainer: {
-    width: '80%',
-    height: 10,
-    backgroundColor: '#E0E0E0',
-    borderRadius: 5,
-    overflow: 'hidden',
-  },
-  progressBar: {
-    height: '100%',
-    backgroundColor: '#FF5A00',
   },
   nextButton: {
     flexDirection: 'row',
@@ -472,5 +562,62 @@ const styles = StyleSheet.create({
     fontSize: 16,
     minHeight: 100,
     textAlignVertical: 'top',
+  },
+  // Overlay styles
+  overlayContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    zIndex: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  overlayContent: {
+    backgroundColor: 'white',
+    borderRadius: 16,
+    padding: 24,
+    width: '80%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  overlayText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 16,
+    marginBottom: 24,
+  },
+  progressBarContainer: {
+    width: '100%',
+    height: 10,
+    backgroundColor: '#E0E0E0',
+    borderRadius: 5,
+    overflow: 'hidden',
+  },
+  progressBar: {
+    height: '100%',
+    backgroundColor: '#FF5A00',
+  },
+  progressText: {
+    marginTop: 8,
+    fontSize: 14,
+  },
+  feedbackContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFF5F0',
+    borderWidth: 1,
+    borderColor: '#FF5A00',
+    borderRadius: 8,
+    padding: 12,
+    marginTop: 16,
+    width: '100%',
+  },
+  feedbackText: {
+    color: '#FF5A00',
+    marginLeft: 8,
+    flex: 1,
   },
 });
