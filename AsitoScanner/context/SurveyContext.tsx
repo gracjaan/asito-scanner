@@ -1,8 +1,10 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
 export type SurveyQuestion = {
   id: string;
-  text: string;
+  text: string; // For backward compatibility
+  displayText: string; // What to show to the user (e.g., "take a photo of laptop")
+  analyticalQuestion: string; // What to send to OpenAI (e.g., "is the laptop clean?")
   images: string[];
   answer?: string;
   completed: boolean;
@@ -49,34 +51,51 @@ const SurveyContext = createContext<SurveyContextType>({
 const sampleQuestions: SurveyQuestion[] = [
   {
     id: '1',
-    text: 'take a photo of the staircase and main entrance',
+    text: 'take a photo of the laptop', // For backward compatibility
+    displayText: 'take a photo of the laptop',
+    analyticalQuestion: 'is the laptop macbook?',
     images: [],
     completed: false,
   },
   {
     id: '2',
-    text: 'take a photo of the emergency exit',
+    text: 'take a photo of the backpack', // For backward compatibility
+    displayText: 'take a photo of the backpack',
+    analyticalQuestion: 'is the backpack black?',
     images: [],
     completed: false,
   },
-  {
-    id: '3',
-    text: 'take a photo of the elevator',
-    images: [],
-    completed: false,
-  },
-  {
-    id: '4',
-    text: 'take a photo of the hallway',
-    images: [],
-    completed: false,
-  },
-  {
-    id: '5',
-    text: 'take a photo of the common area',
-    images: [],
-    completed: false,
-  },
+  // Building inspection questions (commented out)
+  // {
+  //   id: '1',
+  //   text: 'take a photo of the staircase and main entrance',
+  //   images: [],
+  //   completed: false,
+  // },
+  // {
+  //   id: '2',
+  //   text: 'take a photo of the emergency exit',
+  //   images: [],
+  //   completed: false,
+  // },
+  // {
+  //   id: '3',
+  //   text: 'take a photo of the elevator',
+  //   images: [],
+  //   completed: false,
+  // },
+  // {
+  //   id: '4',
+  //   text: 'take a photo of the hallway',
+  //   images: [],
+  //   completed: false,
+  // },
+  // {
+  //   id: '5',
+  //   text: 'take a photo of the common area',
+  //   images: [],
+  //   completed: false,
+  // },
 ];
 
 export const SurveyProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -88,6 +107,17 @@ export const SurveyProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const [surveyDescription, setSurveyDescription] = useState(
     'Inspection of the building facilities and safety measures.'
   );
+
+  useEffect(() => {
+    const allCompleted = questions.every(q => q.completed);
+    if (allCompleted && questions.length > 0) {
+      setSurveyStatus('completed');
+    } else if (questions.some(q => q.completed)) {
+      setSurveyStatus('in progress');
+    } else {
+      setSurveyStatus('not started');
+    }
+  }, [questions]);
 
   const addImageToQuestion = (questionId: string, imageUri: string) => {
     setQuestions(prevQuestions =>
