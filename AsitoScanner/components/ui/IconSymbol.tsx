@@ -18,6 +18,8 @@ const MAPPING = {
   'camera': 'camera',
   'plus': 'add',
   'checkmark': 'check',
+  'xmark': 'close',
+  'envelope': 'email',
 } as Partial<
   Record<
     import('expo-symbols').SymbolViewProps['name'],
