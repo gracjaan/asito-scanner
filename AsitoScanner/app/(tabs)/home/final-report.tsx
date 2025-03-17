@@ -1,6 +1,11 @@
-import { View, Text, StyleSheet, ScrollView, Image } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Alert } from "react-native";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { useSurvey } from "@/context/SurveyContext";
+import { router } from "expo-router";
+import { useState } from "react";
+import { EmailModal } from "@/components/EmailModal";
+import { sendReportByEmail } from "@/services/emailService";
+import { saveReport } from "@/services/storageService";
 
 export default function FinalReport() {
     const {
@@ -11,7 +16,40 @@ export default function FinalReport() {
         surveyDescription
     } = useSurvey();
 
+    const [showEmailModal, setShowEmailModal] = useState(false);
+
     const completedQuestions = questions.filter(q => q.completed);
+
+    const handleViewAllReports = () => {
+        router.replace('/');
+    };
+
+    const handleSendEmail = async (email: string) => {
+        try {
+            // Create a report object from the current survey data
+            const report = {
+                id: new Date().getTime().toString(),
+                scope: "Nationale Nederlandse",
+                date: surveyDate,
+                status: surveyStatus,
+                userName: userName,
+                description: surveyDescription,
+                questions: questions
+            };
+
+            // Save the report first (if not already saved)
+            await saveReport(report);
+
+            // Send the email
+            return await sendReportByEmail(report, email);
+        } catch (error) {
+            console.error("Error sending email:", error);
+            return {
+                success: false,
+                message: "Failed to send email. Please try again."
+            };
+        }
+    };
 
     const renderImagePlaceholders = (images: string[]) => {
         if (images.length === 0) return null;
@@ -42,57 +80,103 @@ export default function FinalReport() {
     };
 
     return (
-        <ScrollView style={styles.container}>
-            <Text style={styles.title}>Nationale Nederlandse</Text>
-            <View style={styles.infoSection}>
-                <View style={styles.infoRow}>
-                    <IconSymbol name="person" size={20} color="#000" />
-                    <Text style={styles.infoText}>{userName}</Text>
-                </View>
-
-                <View style={styles.infoRow}>
-                    <IconSymbol name="calendar" size={20} color="#000" />
-                    <Text style={styles.infoText}>{surveyDate}</Text>
-                </View>
-
-                <View style={styles.infoRow}>
-                    <IconSymbol name="hand.thumbsup" size={20} color="#000" />
-                    <Text style={styles.infoText}>{surveyStatus}</Text>
-                </View>
-
-                <View style={styles.infoRow}>
-                    <IconSymbol name="doc.text" size={20} color="#000" />
-                    <Text style={styles.descriptionText}>{surveyDescription}</Text>
-                </View>
-            </View>
-
-            <View style={styles.divider} />
-
-            {completedQuestions.map((question, index) => (
-                <View key={question.id} style={styles.questionSection}>
-                    <Text style={styles.questionText}>{question.text}</Text>
-
-                    <View style={styles.answerBox}>
-                        <Text style={styles.answerText}>
-                            {question.answer || "Dolore eu culpa mollit veniam excepteur. Aliqua reprehenderit proident sint pariatur ut incididunt commodo labore sunt minim ut do eu dolor culpa. Labore cillum commodo reprehenderit irure enim excepteur labore elit aliqua. "}
-                        </Text>
+        <View style={styles.mainContainer}>
+            <ScrollView style={styles.container}>
+                <Text style={styles.title}>Nationale Nederlandse</Text>
+                <View style={styles.infoSection}>
+                    <View style={styles.infoRow}>
+                        <IconSymbol name="person" size={20} color="#000" />
+                        <Text style={styles.infoText}>{userName}</Text>
                     </View>
 
-                    {renderImagePlaceholders(question.images)}
+                    <View style={styles.infoRow}>
+                        <IconSymbol name="calendar" size={20} color="#000" />
+                        <Text style={styles.infoText}>{surveyDate}</Text>
+                    </View>
 
-                    {index < completedQuestions.length - 1 && (
-                        <View style={styles.questionDivider} />
-                    )}
+                    <View style={styles.infoRow}>
+                        <IconSymbol name="hand.thumbsup" size={20} color="#000" />
+                        <Text style={styles.infoText}>{surveyStatus}</Text>
+                    </View>
+
+                    <View style={styles.infoRow}>
+                        <IconSymbol name="doc.text" size={20} color="#000" />
+                        <Text style={styles.descriptionText}>{surveyDescription}</Text>
+                    </View>
                 </View>
-            ))}
-        </ScrollView>
+
+                <View style={styles.divider} />
+
+                {completedQuestions.length > 0 ? (
+                    completedQuestions.map((question, index) => (
+                        <View key={question.id} style={styles.questionSection}>
+                            <Text style={styles.questionText}>
+                                {question.displayText || question.text}
+                            </Text>
+                            
+                            <View style={styles.analyticalQuestionContainer}>
+                                <Text style={styles.analyticalQuestionText}>
+                                    {question.analyticalQuestion || question.text}
+                                </Text>
+                            </View>
+
+                            <View style={styles.answerBox}>
+                                <Text style={styles.answerText}>
+                                    {question.answer || "No analysis available for this question."}
+                                </Text>
+                            </View>
+
+                            {renderImagePlaceholders(question.images)}
+
+                            {index < completedQuestions.length - 1 && (
+                                <View style={styles.questionDivider} />
+                            )}
+                        </View>
+                    ))
+                ) : (
+                    <View style={styles.emptyStateContainer}>
+                        <IconSymbol name="exclamationmark.circle" size={50} color="#ccc" />
+                        <Text style={styles.emptyStateText}>
+                            No completed questions found. Please complete at least one question to generate a report.
+                        </Text>
+                    </View>
+                )}
+                
+                {/* Add some padding at the bottom for the button */}
+                <View style={{ height: 80 }} />
+            </ScrollView>
+
+            {/* Email Modal */}
+            <EmailModal
+                visible={showEmailModal}
+                onClose={() => setShowEmailModal(false)}
+                onSendEmail={handleSendEmail}
+            />
+
+            {/* Action Buttons */}
+            <View style={styles.actionButtonsContainer}>
+                <TouchableOpacity 
+                    style={styles.actionButton}
+                    onPress={() => setShowEmailModal(true)}
+                >
+                    <IconSymbol name="envelope" size={24} color="#FFFFFF" />
+                </TouchableOpacity>
+                
+                <TouchableOpacity 
+                    style={styles.actionButton}
+                    onPress={handleViewAllReports}
+                >
+                    <IconSymbol name="doc.text" size={24} color="#FFFFFF" />
+                </TouchableOpacity>
+            </View>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
-    safeArea: {
+    mainContainer: {
         flex: 1,
-        backgroundColor: '#fff'
+        backgroundColor: '#fff',
     },
     container: {
         flex: 1,
@@ -140,6 +224,17 @@ const styles = StyleSheet.create({
         color: '#000',
         marginBottom: 10,
     },
+    analyticalQuestionContainer: {
+        backgroundColor: '#f5f5f5',
+        borderRadius: 4,
+        padding: 10,
+        marginBottom: 10,
+    },
+    analyticalQuestionText: {
+        fontSize: 16,
+        fontStyle: 'italic',
+        color: '#666',
+    },
     answerBox: {
         borderWidth: 1,
         borderColor: '#ddd',
@@ -176,15 +271,40 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
     },
-    nextImageButton: {
-        width: 40,
-        height: 40,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
     questionDivider: {
         height: 1,
         backgroundColor: '#eee',
         marginVertical: 10,
+    },
+    emptyStateContainer: {
+        padding: 40,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    emptyStateText: {
+        marginTop: 20,
+        fontSize: 16,
+        color: '#666',
+        textAlign: 'center',
+    },
+    actionButtonsContainer: {
+        position: 'absolute',
+        bottom: 100,
+        right: 20,
+        flexDirection: 'column',
+        gap: 16,
+    },
+    actionButton: {
+        width: 56,
+        height: 56,
+        borderRadius: 28,
+        backgroundColor: '#FF5A00',
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+        elevation: 5,
     },
 });
