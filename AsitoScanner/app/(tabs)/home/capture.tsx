@@ -1,16 +1,15 @@
+import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, View, Image, TouchableOpacity, ActivityIndicator, Animated, Dimensions, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
-import { useState, useEffect, useRef } from 'react';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { ThemedText } from '@/components/ThemedText';
 import { useSurvey } from '@/context/SurveyContext';
-import {sendImagesToOpenAIWithBase64, OpenAIAnalysisResponse} from '@/services/openaiService';
-import {SubmitModal} from "@/components/SubmitModal";
-import { saveReport } from '@/services/storageService';
-
+import { sendImagesToOpenAIWithBase64 } from '@/services/openaiService';
+import { SubmitModal } from '@/components/SubmitModal';
+import { saveReport } from '@/services/storageService';  // Moved to top
 
 const { width } = Dimensions.get('window');
 
@@ -21,10 +20,16 @@ const DOT_COLORS = {
 };
 
 export default function CaptureScreen() {
-  const { 
-    questions, 
-    currentQuestionIndex, 
-    setCurrentQuestionIndex,
+  // Grab the route param (e.g., ?location=Entrance) and fall back to "Entrance" if none is provided
+  const { location } = useLocalSearchParams();
+  const locationFilter = location || 'Entrance';
+
+  // Get the full question list from context
+  const {
+    questions,
+    // Optionally remove if you’re not using them:
+    // currentQuestionIndex,
+    // setCurrentQuestionIndex,
     addImageToQuestion,
     markQuestionAsCompleted,
     setAnswerForQuestion,
@@ -34,26 +39,46 @@ export default function CaptureScreen() {
     surveyDescription
   } = useSurvey();
 
+  // Filter only those questions that match our selected location
+  const locationQuestions = questions.filter(q => q.location === locationFilter);
+
+  // Local question index for the currently displayed question
+  const [localQuestionIndex, setLocalQuestionIndex] = useState(0);
+
+  // Whenever locationFilter changes, reset to 0
+  useEffect(() => {
+    setLocalQuestionIndex(0);
+  }, [locationFilter]);
+
+  // Local state for analyzing images, feedback, etc.
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [analysisProgress, setAnalysisProgress] = useState(0);
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
-  const progressAnim = useRef(new Animated.Value(0)).current;
-  
-  const currentDisplayText = questions[currentQuestionIndex]?.displayText || questions[currentQuestionIndex]?.text || '';
-  const currentAnalyticalQuestion = questions[currentQuestionIndex]?.analyticalQuestion || questions[currentQuestionIndex]?.text || '';
-  
-  const currentImages = questions[currentQuestionIndex]?.images || [];
 
+  const progressAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(width)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
+  // Pull out the question we’re displaying now
+  const currentDisplayText =
+      locationQuestions[localQuestionIndex]?.displayText ||
+      locationQuestions[localQuestionIndex]?.text ||
+      '';
+  const currentAnalyticalQuestion =
+      locationQuestions[localQuestionIndex]?.analyticalQuestion ||
+      locationQuestions[localQuestionIndex]?.text ||
+      '';
+  const currentImages = locationQuestions[localQuestionIndex]?.images || [];
+
+  // Keep dot styles in sync with localQuestionIndex
   const [dotStyles, setDotStyles] = useState(() =>
-    Array(questions.length).fill(0).map((_, i) => ({
-      scale: i === currentQuestionIndex ? 1.3 : 1,
-      color: i === currentQuestionIndex ? DOT_COLORS.ACTIVE : 
-             i < currentQuestionIndex ? DOT_COLORS.COMPLETED : DOT_COLORS.INACTIVE
-    }))
+      Array(locationQuestions.length)
+          .fill(0)
+          .map((_, i) => ({
+            scale: i === 0 ? 1.3 : 1,
+            color: i === 0 ? DOT_COLORS.ACTIVE : DOT_COLORS.INACTIVE
+          }))
   );
 
   useEffect(() => {
@@ -61,31 +86,28 @@ export default function CaptureScreen() {
       Animated.timing(slideAnim, {
         toValue: 0,
         duration: 300,
-        useNativeDriver: true,
+        useNativeDriver: true
       }),
       Animated.timing(fadeAnim, {
         toValue: 1,
         duration: 300,
-        useNativeDriver: true,
+        useNativeDriver: true
       })
     ]).start();
   }, []);
 
-  // Animation for the progress bar
+  // Animate progress bar when analyzing
   useEffect(() => {
     if (isAnalyzing) {
-      // Reset progress animation
       progressAnim.setValue(0);
       setAnalysisProgress(0);
-      
-      // Animate to 90% quickly, then slow down
+
       Animated.timing(progressAnim, {
         toValue: 0.9,
         duration: 6000,
-        useNativeDriver: false,
+        useNativeDriver: false
       }).start();
-      
-      // Update the progress state for display
+
       const interval = setInterval(() => {
         setAnalysisProgress(prev => {
           if (prev < 90) {
@@ -95,14 +117,14 @@ export default function CaptureScreen() {
           return prev;
         });
       }, 300);
-      
+
       return () => clearInterval(interval);
     } else if (analysisProgress > 0) {
-      // Complete the progress animation when analysis is done
+      // Snap to 100%, then hide
       Animated.timing(progressAnim, {
         toValue: 1,
         duration: 300,
-        useNativeDriver: false,
+        useNativeDriver: false
       }).start(() => {
         setTimeout(() => {
           setAnalysisProgress(0);
@@ -114,23 +136,22 @@ export default function CaptureScreen() {
 
   const updateDotStyles = (newIndex: number) => {
     setDotStyles(prev =>
-      prev.map((style, i) => {
-        if (i === newIndex) {
-          return { scale: 1.3, color: DOT_COLORS.ACTIVE };
-        } else if (i < newIndex) {
-          return { scale: 1, color: DOT_COLORS.COMPLETED };
-        } else {
-          return { scale: 1, color: DOT_COLORS.INACTIVE };
-        }
-      })
+        prev.map((style, i) => {
+          if (i === newIndex) {
+            return { scale: 1.3, color: DOT_COLORS.ACTIVE };
+          } else if (i < newIndex) {
+            return { scale: 1, color: DOT_COLORS.COMPLETED };
+          } else {
+            return { scale: 1, color: DOT_COLORS.INACTIVE };
+          }
+        })
     );
   };
 
   const takePhoto = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
-
     if (status !== 'granted') {
-      alert('Sorry, we need camera permissions to make this work!');
+      Alert.alert('Error', 'Sorry, we need camera permissions to make this work!');
       return;
     }
 
@@ -138,25 +159,25 @@ export default function CaptureScreen() {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 3],
-      quality: 1,
+      quality: 1
     });
 
     if (!result.canceled) {
       const imageUri = result.assets[0].uri;
-      addImageToQuestion(questions[currentQuestionIndex].id, imageUri);
-      // Clear any previous feedback when a new image is added
+      // Use the localQuestionIndex to find the correct question
+      addImageToQuestion(locationQuestions[localQuestionIndex].id, imageUri);
       setFeedbackMessage(null);
     }
   };
 
   const handleNext = async () => {
-    const currentImages = questions[currentQuestionIndex]?.images || [];
+    const currentImgs = locationQuestions[localQuestionIndex]?.images || [];
 
-    if (currentImages.length === 0) {
+    if (currentImgs.length === 0) {
       Alert.alert(
-        "No Images",
-        "Please take at least one photo before proceeding.",
-        [{ text: "OK" }]
+          'No Images',
+          'Please take at least one photo before proceeding.',
+          [{ text: 'OK' }]
       );
       return;
     }
@@ -164,42 +185,41 @@ export default function CaptureScreen() {
     setIsAnalyzing(true);
     try {
       const response = await sendImagesToOpenAIWithBase64(
-        currentImages, 
-        currentAnalyticalQuestion
+          currentImgs,
+          currentAnalyticalQuestion
       );
 
       if (response) {
-        // Save the answer to the question
-        setAnswerForQuestion(questions[currentQuestionIndex].id, response.answer);
+        setAnswerForQuestion(locationQuestions[localQuestionIndex].id, response.answer);
 
         if (response.isComplete) {
-          // If the response indicates the images are sufficient, mark as completed and proceed
-          markQuestionAsCompleted(questions[currentQuestionIndex].id);
+          markQuestionAsCompleted(locationQuestions[localQuestionIndex].id);
           setFeedbackMessage(null);
 
-          if (currentQuestionIndex === questions.length - 1) {
+          // If it's the last question in this location => show submit modal
+          if (localQuestionIndex === locationQuestions.length - 1) {
             setShowSubmitModal(true);
           } else {
-            const nextIndex = (currentQuestionIndex + 1) % questions.length;
-            navigateToQuestion(nextIndex);
+            navigateToQuestion(localQuestionIndex + 1);
           }
         } else {
-          // If more images are needed, show feedback to the user
-          setFeedbackMessage(response.suggestedAction || "Please take more detailed photos.");
+          setFeedbackMessage(
+              response.suggestedAction || 'Please take more detailed photos.'
+          );
         }
       } else {
         Alert.alert(
-          "Analysis Failed",
-          "There was a problem analyzing your images. Please try again.",
-          [{ text: "OK" }]
+            'Analysis Failed',
+            'There was a problem analyzing your images. Please try again.',
+            [{ text: 'OK' }]
         );
       }
     } catch (error) {
-      console.error("Error sending images to OpenAI:", error);
+      console.error('Error sending images to OpenAI:', error);
       Alert.alert(
-        "Error",
-        "An error occurred while analyzing your images. Please try again.",
-        [{ text: "OK" }]
+          'Error',
+          'An error occurred while analyzing your images. Please try again.',
+          [{ text: 'OK' }]
       );
     } finally {
       setIsAnalyzing(false);
@@ -207,34 +227,37 @@ export default function CaptureScreen() {
   };
 
   const handlePrevious = () => {
-    const prevIndex = (currentQuestionIndex - 1 + questions.length) % questions.length;
+    // Navigate backward through the local questions
+    if (localQuestionIndex === 0) return;
+
+    const prevIndex = localQuestionIndex - 1;
     navigateToQuestion(prevIndex);
   };
 
   const navigateToQuestion = (newIndex: number) => {
-    // determine animation direction (left or right)
-    const isForward = newIndex > currentQuestionIndex || (currentQuestionIndex === questions.length - 1 && newIndex === 0);
+    const isForward =
+        newIndex > localQuestionIndex ||
+        (localQuestionIndex === locationQuestions.length - 1 && newIndex === 0);
+
     const startValue = isForward ? width : -width;
     const endValue = isForward ? -width : width;
-    
-    // start slide out animation
+
     Animated.parallel([
       Animated.timing(slideAnim, {
         toValue: endValue,
         duration: 300,
-        useNativeDriver: true,
+        useNativeDriver: true
       }),
       Animated.timing(fadeAnim, {
         toValue: 0,
         duration: 200,
-        useNativeDriver: true,
+        useNativeDriver: true
       })
     ]).start(() => {
       setIsAnalyzing(false);
       setFeedbackMessage(null);
 
-      setCurrentQuestionIndex(newIndex);
-
+      setLocalQuestionIndex(newIndex);
       updateDotStyles(newIndex);
 
       slideAnim.setValue(startValue);
@@ -244,12 +267,12 @@ export default function CaptureScreen() {
         Animated.timing(slideAnim, {
           toValue: 0,
           duration: 300,
-          useNativeDriver: true,
+          useNativeDriver: true
         }),
         Animated.timing(fadeAnim, {
           toValue: 1,
           duration: 300,
-          useNativeDriver: true,
+          useNativeDriver: true
         })
       ]).start();
     });
@@ -257,20 +280,16 @@ export default function CaptureScreen() {
 
   const handleSubmit = async () => {
     setShowSubmitModal(false);
-    
     try {
-      // Create a unique ID for the report
       const reportId = `report-${Date.now()}`;
-      
-      // Save the completed survey to localStorage
       await saveReport({
         id: reportId,
-        scope: 'Building Inspection', // Default scope, could be customizable
+        scope: 'Building Inspection',
         date: surveyDate,
         status: surveyStatus,
-        userName: userName,
+        userName,
         description: surveyDescription,
-        questions: questions.map(q => ({
+        questions: locationQuestions.map(q => ({
           id: q.id,
           text: q.text,
           displayText: q.displayText || q.text,
@@ -280,176 +299,182 @@ export default function CaptureScreen() {
           completed: q.completed
         }))
       });
-      
+
       console.log('Survey saved successfully');
       router.push('/home/final-report');
     } catch (error) {
       console.error('Error saving survey:', error);
-      Alert.alert(
-        'Error',
-        'There was a problem saving your survey. Please try again.',
-        [{ text: 'OK' }]
-      );
+      Alert.alert('Error', 'There was a problem saving your survey. Please try again.', [
+        { text: 'OK' }
+      ]);
     }
   };
 
   const renderSmallPlaceholders = () => {
     if (currentImages.length === 0) return null;
 
+    // Show up to 5 images, one big plus up to 4 small, etc.
     const remainingPlaceholders = Math.min(5 - currentImages.length, 1);
+
     return (
-      <View style={styles.smallPlaceholdersContainer}>
-        {currentImages.slice(1).map((img, index) => (
-          <View key={index} style={styles.smallImageContainer}>
-            <Image source={{ uri: img }} style={styles.smallImage} />
-          </View>
-        ))}
-        {[...Array(remainingPlaceholders)].map((_, index) => (
-          <TouchableOpacity
-            key={`placeholder-${index}`}
-            style={styles.smallImageContainer}
-            onPress={takePhoto}
-          >
-            <IconSymbol name="camera" size={30} color="grey" />
-          </TouchableOpacity>
-        ))}
-      </View>
+        <View style={styles.smallPlaceholdersContainer}>
+          {currentImages.slice(1).map((img, index) => (
+              <View key={index} style={styles.smallImageContainer}>
+                <Image source={{ uri: img }} style={styles.smallImage} />
+              </View>
+          ))}
+          {[...Array(remainingPlaceholders)].map((_, index) => (
+              <TouchableOpacity
+                  key={`placeholder-${index}`}
+                  style={styles.smallImageContainer}
+                  onPress={takePhoto}
+              >
+                <IconSymbol name="camera" size={30} color="grey" />
+              </TouchableOpacity>
+          ))}
+        </View>
     );
   };
 
-  // Render the analysis overlay with progress bar
   const renderAnalysisOverlay = () => {
     if (!isAnalyzing && analysisProgress === 0) return null;
-    
+
     const progressWidth = progressAnim.interpolate({
       inputRange: [0, 1],
-      outputRange: ['0%', '100%'],
+      outputRange: ['0%', '100%']
     });
-    
+
     return (
-      <View style={styles.overlayContainer}>
-        <View style={styles.overlayContent}>
-          <ActivityIndicator size="large" color="#FF5A00" />
-          <ThemedText style={styles.overlayText}>
-            Analyzing images...
-          </ThemedText>
-          <View style={styles.progressBarContainer}>
-            <Animated.View 
-              style={[
-                styles.progressBar,
-                { width: progressWidth }
-              ]} 
-            />
+        <View style={styles.overlayContainer}>
+          <View style={styles.overlayContent}>
+            <ActivityIndicator size="large" color="#FF5A00" />
+            <ThemedText style={styles.overlayText}>Analyzing images...</ThemedText>
+
+            <View style={styles.progressBarContainer}>
+              <Animated.View
+                  style={[
+                    styles.progressBar,
+                    { width: progressWidth }
+                  ]}
+              />
+            </View>
+
+            <ThemedText style={styles.progressText}>{analysisProgress}%</ThemedText>
           </View>
-          <ThemedText style={styles.progressText}>
-            {analysisProgress}%
-          </ThemedText>
         </View>
-      </View>
     );
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
-      <View style={styles.container}>
-        <SubmitModal 
-          visible={showSubmitModal}
-          onCancel={() => setShowSubmitModal(false)}
-          onSubmit={handleSubmit}
-        />
+      <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+        <View style={styles.container}>
+          <SubmitModal
+              visible={showSubmitModal}
+              onCancel={() => setShowSubmitModal(false)}
+              onSubmit={handleSubmit}
+          />
 
-        {renderAnalysisOverlay()}
+          {renderAnalysisOverlay()}
 
-        <Animated.View
-          style={[
-            styles.contentContainer,
-            {
-              transform: [{ translateX: slideAnim }],
-              opacity: fadeAnim
-            }
-          ]}
-        >
-          <View style={styles.header}>
-            <ThemedText style={styles.headerText}>{currentDisplayText}</ThemedText>
-          </View>
-
-          <TouchableOpacity
-            style={styles.imagePlaceholder}
-            onPress={currentImages.length === 0 ? takePhoto : undefined}
+          <Animated.View
+              style={[
+                styles.contentContainer,
+                {
+                  transform: [{ translateX: slideAnim }],
+                  opacity: fadeAnim
+                }
+              ]}
           >
-            {currentImages.length > 0 ? (
-              <Image source={{ uri: currentImages[0] }} style={styles.image} />
-            ) : (
-              <IconSymbol name="camera" size={100} color="grey" />
+            <View style={styles.header}>
+              <ThemedText style={styles.headerText}>{currentDisplayText}</ThemedText>
+            </View>
+
+            <TouchableOpacity
+                style={styles.imagePlaceholder}
+                onPress={currentImages.length === 0 ? takePhoto : undefined}
+            >
+              {currentImages.length > 0 ? (
+                  <Image source={{ uri: currentImages[0] }} style={styles.image} />
+              ) : (
+                  <IconSymbol name="camera" size={100} color="grey" />
+              )}
+            </TouchableOpacity>
+
+            {renderSmallPlaceholders()}
+
+            {feedbackMessage && (
+                <View style={styles.feedbackContainer}>
+                  <IconSymbol name="exclamationmark.triangle" size={24} color="#FF5A00" />
+                  <ThemedText style={styles.feedbackText}>{feedbackMessage}</ThemedText>
+                </View>
             )}
-          </TouchableOpacity>
 
-          {renderSmallPlaceholders()}
+            <View style={styles.progressContainer}>
+              <View style={styles.progressDotsContainer}>
+                {/* Previous */}
+                <TouchableOpacity
+                    style={[
+                      styles.backButton,
+                      localQuestionIndex === 0 && styles.disabledButton
+                    ]}
+                    onPress={handlePrevious}
+                    disabled={localQuestionIndex === 0}
+                >
+                  <IconSymbol
+                      name="chevron.left"
+                      size={24}
+                      color={
+                        localQuestionIndex === 0
+                            ? 'rgba(255, 255, 255, 0.5)'
+                            : '#FFFFFF'
+                      }
+                  />
+                </TouchableOpacity>
 
-          {feedbackMessage && (
-            <View style={styles.feedbackContainer}>
-              <IconSymbol name="exclamationmark.triangle" size={24} color="#FF5A00" />
-              <ThemedText style={styles.feedbackText}>{feedbackMessage}</ThemedText>
+                {/* Dots */}
+                {locationQuestions.map((_, index) => (
+                    <View
+                        key={index}
+                        style={[
+                          styles.progressDot,
+                          {
+                            transform: [{ scale: dotStyles[index]?.scale || 1 }],
+                            backgroundColor: dotStyles[index]?.color || DOT_COLORS.INACTIVE
+                          }
+                        ]}
+                    />
+                ))}
+
+                {/* Next */}
+                <TouchableOpacity
+                    style={styles.backButton}
+                    onPress={handleNext}
+                    disabled={isAnalyzing}
+                >
+                  <IconSymbol name="chevron.right" size={24} color="#FFFFFF" />
+                </TouchableOpacity>
+              </View>
             </View>
-          )}
-
-          <View style={styles.progressContainer}>
-            <View style={styles.progressDotsContainer}>
-              <TouchableOpacity 
-                style={[
-                  styles.backButton,
-                  currentQuestionIndex === 0 && styles.disabledButton
-                ]} 
-                onPress={handlePrevious}
-                disabled={currentQuestionIndex === 0}
-              >
-                <IconSymbol 
-                  name="chevron.left" 
-                  size={24} 
-                  color={currentQuestionIndex === 0 ? "rgba(255, 255, 255, 0.5)" : "#FFFFFF"} 
-                />
-              </TouchableOpacity>
-              {questions.map((_, index) => (
-                <View
-                  key={index}
-                  style={[
-                    styles.progressDot,
-                    {
-                      transform: [{ scale: dotStyles[index].scale }],
-                      backgroundColor: dotStyles[index].color
-                    }
-                  ]}
-                />
-              ))}
-              <TouchableOpacity 
-                style={styles.backButton} 
-                onPress={handleNext}
-                disabled={isAnalyzing}
-              >
-                <IconSymbol name="chevron.right" size={24} color="#FFFFFF" />
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Animated.View>
-      </View>
-    </SafeAreaView>
+          </Animated.View>
+        </View>
+      </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   safeArea: {
-    flex: 1,
+    flex: 1
   },
   container: {
     flex: 1,
     alignItems: 'center',
     padding: 16,
-    overflow: 'hidden',
+    overflow: 'hidden'
   },
   contentContainer: {
     flex: 1,
     width: '100%',
-    alignItems: 'center',
+    alignItems: 'center'
   },
   progressContainer: {
     flex: 1,
@@ -458,23 +483,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'flex-end',
     paddingVertical: 100,
-    gap: 8,
+    gap: 8
   },
   progressDot: {
     width: 12,
     height: 12,
-    borderRadius: 6,
+    borderRadius: 6
   },
   header: {
     width: '100%',
     paddingVertical: 20,
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
   headerText: {
     fontSize: 24,
     fontWeight: '100',
-    textAlign: 'center',
+    textAlign: 'center'
   },
   imagePlaceholder: {
     width: '100%',
@@ -483,17 +508,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 2,
     borderColor: 'grey',
-    borderStyle: 'dashed',
+    borderStyle: 'dashed'
   },
   image: {
     width: '100%',
     height: '100%',
-    resizeMode: 'cover',
+    resizeMode: 'cover'
   },
   smallPlaceholdersContainer: {
     flexDirection: 'row',
     marginTop: 16,
-    gap: 8,
+    gap: 8
   },
   smallImageContainer: {
     width: 80,
@@ -502,29 +527,12 @@ const styles = StyleSheet.create({
     borderColor: 'grey',
     borderStyle: 'dashed',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
   smallImage: {
     width: '100%',
     height: '100%',
-    resizeMode: 'cover',
-  },
-  nextButton: {
-    flexDirection: 'row',
-    backgroundColor: '#FF5A00',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 24,
-    width: '80%',
-  },
-  nextButtonText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginRight: 8,
+    resizeMode: 'cover'
   },
   backButton: {
     backgroundColor: '#023866',
@@ -533,37 +541,17 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 20,
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
   disabledButton: {
-    backgroundColor: 'rgba(2, 56, 102, 0.5)',
+    backgroundColor: 'rgba(2, 56, 102, 0.5)'
   },
   progressDotsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
+    gap: 8
   },
-  answerContainer: {
-    width: '100%',
-    marginTop: 16,
-    marginBottom: 16,
-  },
-  answerLabel: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  answerInput: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    minHeight: 100,
-    textAlignVertical: 'top',
-  },
-  // Overlay styles
   overlayContainer: {
     position: 'absolute',
     top: 0,
@@ -573,7 +561,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.7)',
     zIndex: 10,
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'center'
   },
   overlayContent: {
     backgroundColor: 'white',
@@ -581,28 +569,28 @@ const styles = StyleSheet.create({
     padding: 24,
     width: '80%',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'center'
   },
   overlayText: {
     fontSize: 18,
     fontWeight: 'bold',
     marginTop: 16,
-    marginBottom: 24,
+    marginBottom: 24
   },
   progressBarContainer: {
     width: '100%',
     height: 10,
     backgroundColor: '#E0E0E0',
     borderRadius: 5,
-    overflow: 'hidden',
+    overflow: 'hidden'
   },
   progressBar: {
     height: '100%',
-    backgroundColor: '#FF5A00',
+    backgroundColor: '#FF5A00'
   },
   progressText: {
     marginTop: 8,
-    fontSize: 14,
+    fontSize: 14
   },
   feedbackContainer: {
     flexDirection: 'row',
@@ -613,11 +601,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 12,
     marginTop: 16,
-    width: '100%',
+    width: '100%'
   },
   feedbackText: {
     color: '#FF5A00',
     marginLeft: 8,
-    flex: 1,
-  },
+    flex: 1
+  }
 });

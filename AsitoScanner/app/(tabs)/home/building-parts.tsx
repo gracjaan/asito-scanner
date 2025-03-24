@@ -9,18 +9,20 @@ const reports = [
         scope: 'Exterior',
     },
     {
-        scope: 'Interior',
+        scope: 'Entrance',
     },
     {
-        scope: 'Roof',
+        scope: 'Break/Chill-Out Area',
     },
     {
-        scope: 'Parking lot',
+        scope: 'Food&Drink',
     },
     {
-        scope: 'Other',
+        scope: 'Corridor/Hall Area',
     },
-
+    {
+        scope: 'Toilet Area',
+    },
 ];
 
 export default function BuildingPartsScreen() {
@@ -32,10 +34,20 @@ export default function BuildingPartsScreen() {
                 keyExtractor={(item) => item.scope}
                 contentContainerStyle={styles.listContent}
                 renderItem={({ item }) => (
-                    <TouchableOpacity style={styles.reportContainer} onPress={() => router.push('/home/capture')}>
+                    // building-parts.tsx
+                    <TouchableOpacity
+                        style={styles.reportContainer}
+                        onPress={() =>
+                            router.push({
+                                pathname: '/home/capture',
+                                params: { location: item.scope }
+                            })
+                        }
+                    >
                         <ThemedText>{item.scope}</ThemedText>
                         <IconSymbol name="chevron.right" size={24} color="#023866" />
                     </TouchableOpacity>
+
                 )}
             />
         </View>
