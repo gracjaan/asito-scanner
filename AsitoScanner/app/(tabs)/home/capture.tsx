@@ -22,14 +22,16 @@ const DOT_COLORS = {
 export default function CaptureScreen() {
   // Grab the route param (e.g., ?location=Entrance) and fall back to "Entrance" if none is provided
   const { location } = useLocalSearchParams();
-  const locationFilter = location || 'Entrance';
+  const locationFilterValue =
+      typeof location === 'string'
+          ? location
+          : Array.isArray(location)
+              ? location[0]
+              : 'Entrance';
 
   // Get the full question list from context
   const {
     questions,
-    // Optionally remove if you’re not using them:
-    // currentQuestionIndex,
-    // setCurrentQuestionIndex,
     addImageToQuestion,
     markQuestionAsCompleted,
     setAnswerForQuestion,
@@ -40,15 +42,17 @@ export default function CaptureScreen() {
   } = useSurvey();
 
   // Filter only those questions that match our selected location
-  const locationQuestions = questions.filter(q => q.location === locationFilter);
+  const locationQuestions = questions.filter(
+      q => q.location?.toLowerCase() === locationFilterValue.toLowerCase()
+  );
 
   // Local question index for the currently displayed question
   const [localQuestionIndex, setLocalQuestionIndex] = useState(0);
 
-  // Whenever locationFilter changes, reset to 0
+  // Whenever locationFilterValue changes, reset to 0
   useEffect(() => {
     setLocalQuestionIndex(0);
-  }, [locationFilter]);
+  }, [locationFilterValue]);
 
   // Local state for analyzing images, feedback, etc.
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -65,6 +69,8 @@ export default function CaptureScreen() {
       locationQuestions[localQuestionIndex]?.displayText ||
       locationQuestions[localQuestionIndex]?.text ||
       '';
+  const currentSubtext =
+      locationQuestions[localQuestionIndex]?.subtext || '';
   const currentAnalyticalQuestion =
       locationQuestions[localQuestionIndex]?.analyticalQuestion ||
       locationQuestions[localQuestionIndex]?.text ||
@@ -81,7 +87,8 @@ export default function CaptureScreen() {
           }))
   );
 
-  useEffect(() => {
+
+useEffect(() => {
     Animated.parallel([
       Animated.timing(slideAnim, {
         toValue: 0,
@@ -293,6 +300,7 @@ export default function CaptureScreen() {
           id: q.id,
           text: q.text,
           displayText: q.displayText || q.text,
+          subtext: q.subtext || "",
           analyticalQuestion: q.analyticalQuestion || q.text,
           answer: q.answer || '',
           images: q.images,
@@ -388,6 +396,11 @@ export default function CaptureScreen() {
             <View style={styles.header}>
               <ThemedText style={styles.headerText}>{currentDisplayText}</ThemedText>
             </View>
+            {currentSubtext ? (
+                <View style={styles.subtextContainer}>
+                  <ThemedText style={styles.subtextText}>{currentSubtext}</ThemedText>
+                </View>
+            ) : null}
 
             <TouchableOpacity
                 style={styles.imagePlaceholder}
@@ -499,6 +512,15 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: 24,
     fontWeight: '100',
+    textAlign: 'center'
+  },
+  subtextContainer: {
+    marginBottom: 12,
+    paddingHorizontal: 16
+  },
+  subtextText: {
+    fontSize: 16,
+    color: '#666',
     textAlign: 'center'
   },
   imagePlaceholder: {

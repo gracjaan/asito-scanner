@@ -21,6 +21,9 @@ const reports = [
         scope: 'Corridor/Hall Area',
     },
     {
+        scope: 'Workplaces',
+    },
+    {
         scope: 'Toilet Area',
     },
 ];
