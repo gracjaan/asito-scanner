@@ -105,7 +105,7 @@ const sampleLocationPrompts: LocationPrompt[] = [
           {
             "id": "entrance-room",
             "text": "Room",
-            "subtext": "As a Whole (Furniture, harmony, Tidiness plants, etc.) Pictures from an open view of the entire space. If plants are present, include a picture of such. Include close view pictures of furniture.",
+            "subtext": "As a Whole\n(Furniture, harmony, Tidiness plants, etc.) Pictures from an open view of the entire space. If plants are present, include a picture of such. Include close view pictures of furniture.",
             "analyticalQuestion": "The entrance area looks like a whole (furniture, color schemes, interior)? The entrance area looks tidy and neat with tidy tables? The furniture is in good condition (not broken, damaged, paint worn off, etc.)? The space is equipped with plants?"
           },
           {
@@ -127,7 +127,7 @@ const sampleLocationPrompts: LocationPrompt[] = [
         "questions": [
           {
             "id": "break-as-a-whole",
-            "text": "As a Whole",
+            "text": "As a Whole\n(Furniture, harmony, Tidiness plants, etc.)",
             "subtext": "Pictures from an open view of the entire space. If plants are present, include a picture of such. Include close view pictures of furniture.",
             "analyticalQuestion": "The break/chill-out area look like a whole (furniture, color schemes, interior)? The break/chill-out area look tidy and neat with tidy tables? The furniture is in good condition (not broken, damaged, paint worn off, etc.)? The space is equipped with plants?"
           },
@@ -174,7 +174,7 @@ const sampleLocationPrompts: LocationPrompt[] = [
         "questions": [
           {
             "id": "food-as-a-whole",
-            "text": "As a Whole",
+            "text": "As a Whole\n(Furniture, harmony, Tidiness plants, etc.)",
             "subtext": "Pictures from an open view of the entire space. If plants are present, include a picture of such. Include close view pictures of furniture.",
             "analyticalQuestion": "The food&drink look like a whole (furniture, color schemes, interior)? The food&drink look tidy and neat with tidy tables? The furniture is in good condition (not broken, damaged, paint worn off, broken chairs, damaged desks, etc.)? The furniture is clean (no litter)? The space is equipped with plants?"
           },
@@ -221,7 +221,7 @@ const sampleLocationPrompts: LocationPrompt[] = [
         "questions": [
           {
             "id": "corridor-as-a-whole",
-            "text": "As a Whole (Furniture, harmony, plants, etc.)",
+            "text": "As a Whole\n(Furniture, harmony, plants, etc.)",
             "subtext": "Pictures from an open view of the entire space. If plants are present, include a picture of such. Include close view pictures of furniture.",
             "analyticalQuestion": "The corridors look like a whole (furniture, color schemes, interior)? The hallways look tidy and neat? The furniture is in good condition (not broken, damaged, paint worn off, etc.)? The space is equipped with plants?"
           },
@@ -274,7 +274,7 @@ const sampleLocationPrompts: LocationPrompt[] = [
         "questions": [
           {
             "id": "workplaces-as-a-whole",
-            "text": "As a Whole (Furniture, harmony, plants, etc.)\n",
+            "text": "As a Whole\n(Furniture, harmony, plants, etc.)\n",
             "subtext": "Pictures from an open view of the entire space. If plants are present, include a picture of such. Include close view pictures of furniture.",
             "analyticalQuestion": "The workplace looks like a whole (furniture, color schemes, interior)? The workplace looks tidy and neat? The furniture is in good condition (no (chairs, desks, etc.) broken, damaged, paint worn off, etc.)? The space is equipped with plants?"
           },
