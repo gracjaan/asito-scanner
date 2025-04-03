@@ -11,13 +11,15 @@ import { sendImagesToOpenAIWithBase64 } from '@/services/openaiService';
 import { SubmitModal } from '@/components/SubmitModal';
 import { saveReport } from '@/services/storageService';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 const DOT_COLORS = {
   INACTIVE: '#E0E0E0',
   ACTIVE: '#FF5A00',
   COMPLETED: '#023866'
 };
+
+const IMAGE_AREA_HEIGHT = height * 0.35;
 
 export default function CaptureScreen() {
   const { location } = useLocalSearchParams();
@@ -28,7 +30,6 @@ export default function CaptureScreen() {
               ? location[0]
               : 'Entrance';
 
-  // Get the full question list from context
   const {
     questions,
     addImageToQuestion,
@@ -42,12 +43,10 @@ export default function CaptureScreen() {
     surveyDescription
   } = useSurvey();
 
-  // Filter only those questions that match our selected location
   const locationQuestions = questions.filter(
       q => q.location?.toLowerCase() === locationFilterValue.toLowerCase()
   );
 
-  // Local question index for the currently displayed question
   const [localQuestionIndex, setLocalQuestionIndex] = useState(0);
 
   useEffect(() => {
@@ -65,7 +64,6 @@ export default function CaptureScreen() {
 
   }, [locationFilterValue, questions]);
 
-  // Local state for analyzing images, feedback, etc.
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [analysisProgress, setAnalysisProgress] = useState(0);
@@ -75,7 +73,6 @@ export default function CaptureScreen() {
   const slideAnim = useRef(new Animated.Value(width)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
-  // Pull out the question we're displaying now
   const currentDisplayText =
       locationQuestions[localQuestionIndex]?.displayText ||
       locationQuestions[localQuestionIndex]?.text ||
@@ -89,7 +86,6 @@ export default function CaptureScreen() {
   const currentImages = locationQuestions[localQuestionIndex]?.images || [];
   const currentQuestionId = locationQuestions[localQuestionIndex]?.id || '';
 
-  // Keep dot styles in sync with localQuestionIndex
   const [dotStyles, setDotStyles] = useState(() =>
       Array(locationQuestions.length)
           .fill(0)
@@ -101,8 +97,8 @@ export default function CaptureScreen() {
 
 
   useEffect(() => {
-    slideAnim.setValue(width); // Start off-screen right
-    fadeAnim.setValue(0);      // Start invisible
+    slideAnim.setValue(width);
+    fadeAnim.setValue(0);
 
     Animated.parallel([
       Animated.timing(slideAnim, {
@@ -117,55 +113,81 @@ export default function CaptureScreen() {
       })
     ]).start();
 
-    // Update dots when the question visually changes
     updateDotStyles(localQuestionIndex);
 
   }, [localQuestionIndex, currentQuestionId]);
 
+
+  // Animate progress bar when analyzing
   // Animate progress bar when analyzing
   useEffect(() => {
-    let progressTimer: Animated.CompositeAnimation | null = null;
+    let progressTimerRef: Animated.CompositeAnimation | null = null; // Use a local ref for the timer instance within this effect run
     let intervalId: NodeJS.Timeout | null = null;
 
     if (isAnalyzing) {
       progressAnim.setValue(0);
-      setAnalysisProgress(0);
+      setAnalysisProgress(0); // Reset progress when starting
 
-      progressTimer = Animated.timing(progressAnim, {
-        toValue: 0.9,
-        duration: 6000,
+      // Start the fake progress animation
+      // Assign to the local ref
+      progressTimerRef = Animated.timing(progressAnim, {
+        toValue: 0.9, // Animate to 90%
+        duration: 6000, // Over 6 seconds
         useNativeDriver: false
       });
-      progressTimer.start();
+      progressTimerRef.start();
 
-
+      // Update the percentage text
       intervalId = setInterval(() => {
         setAnalysisProgress(prev => {
           if (prev < 90) {
-            return prev + 5;
+            return prev + 5; // Increment progress text
           }
-          if (intervalId) clearInterval(intervalId);
+          // Use type assertion for clearInterval if needed, or check if it's Node/Browser specific
+          if (intervalId) clearInterval(intervalId as any); // Stop interval at 90%
           return prev;
         });
       }, 300);
 
-    } else if (analysisProgress > 0 && analysisProgress < 100) {
-      // Snap to 100% if analysis stopped prematurely but was running
-      Animated.timing(progressAnim, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: false
-      }).start(() => {
-        setAnalysisProgress(100);
-      });
+    } else {
+      // If analysis stopped (either success or failure), handle visual snapping
+      // No need to stop the timer here; the cleanup function handles it.
+
+      // Snap the progress bar to 100% visually *if* it had started
+      if (analysisProgress > 0) {
+        Animated.timing(progressAnim, {
+          toValue: 1,
+          duration: 200, // Quick snap animation
+          useNativeDriver: false
+        }).start(() => {
+          setAnalysisProgress(100); // Set text to 100% after snap
+          // Optionally reset progress after a short delay if needed,
+          // although it will reset when isAnalyzing becomes true again.
+          // setTimeout(() => {
+          //     progressAnim.setValue(0);
+          //     setAnalysisProgress(0);
+          // }, 500); // Reset after 500ms delay
+        });
+      } else {
+        // If analysis was stopped before it even started visually, reset progress immediately
+        progressAnim.setValue(0);
+        setAnalysisProgress(0);
+      }
     }
 
-    // Cleanup function
+    // Cleanup function: Runs when isAnalyzing changes or component unmounts
     return () => {
-      if (progressTimer) progressTimer.stop();
-      if (intervalId) clearInterval(intervalId);
+      // Stop the timer *associated with this specific effect run* if it exists
+      if (progressTimerRef) {
+        progressTimerRef.stop();
+      }
+      // Clear the interval associated with this specific effect run if it exists
+      if (intervalId) {
+        clearInterval(intervalId as any); // Use type assertion if needed
+      }
     };
-  }, [isAnalyzing]);
+  }, [isAnalyzing, progressAnim]); // progressAnim added as dependency
+
 
   const skipQuestion = () => {
     if (localQuestionIndex === locationQuestions.length - 1) {
@@ -180,7 +202,6 @@ export default function CaptureScreen() {
     if (requiredLength === 0) return;
 
     setDotStyles(currentStyles => {
-      // Make sure currentStyles has the correct length before mapping
       const adjustedStyles = currentStyles.length === requiredLength
           ? currentStyles
           : Array(requiredLength).fill({ scale: 1, color: DOT_COLORS.INACTIVE });
@@ -189,10 +210,10 @@ export default function CaptureScreen() {
         const question = locationQuestions[i];
         if (i === newIndex) {
           return { scale: 1.3, color: DOT_COLORS.ACTIVE };
-        } else if (question?.completed) { // Check if actually completed first
+        } else if (question?.completed) {
           return { scale: 1, color: DOT_COLORS.COMPLETED };
-        } else if (i < newIndex && (question?.images?.length > 0 || question?.answer)) { // Visited/partially done
-          return { scale: 1, color: DOT_COLORS.COMPLETED }; // Mark as completed if navigated past with data
+        } else if (i < newIndex && (question?.images?.length > 0 || question?.answer)) {
+          return { scale: 1, color: DOT_COLORS.COMPLETED };
         } else {
           return { scale: 1, color: DOT_COLORS.INACTIVE };
         }
@@ -205,7 +226,6 @@ export default function CaptureScreen() {
       Alert.alert('Limit Reached', 'You can add a maximum of 5 images per question.');
       return;
     }
-    // Prevent taking photo if analyzing
     if (isAnalyzing) return;
 
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
@@ -217,17 +237,17 @@ export default function CaptureScreen() {
     try {
       const result = await ImagePicker.launchCameraAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true, // Or false if you don't want editing
-        aspect: [4, 3],      // Or your preferred aspect ratio
-        quality: 0.8,        // Adjust quality (0 to 1)
-        base64: false,       // Don't need base64 here
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
+        base64: false,
       });
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const imageUri = result.assets[0].uri;
         if (currentQuestionId) {
           addImageToQuestion(currentQuestionId, imageUri);
-          setFeedbackMessage(null); // Clear feedback on new image
+          setFeedbackMessage(null);
         }
       }
     } catch (error) {
@@ -237,7 +257,6 @@ export default function CaptureScreen() {
   };
 
   const deleteImage = (imageIndex: number) => {
-    // Prevent deletion if analyzing
     if (isAnalyzing) return;
 
     Alert.alert(
@@ -250,7 +269,6 @@ export default function CaptureScreen() {
             style: 'destructive',
             onPress: () => {
               if (currentQuestionId) {
-                // Call the context function to remove the image
                 removeImageFromQuestion(currentQuestionId, imageIndex);
               }
             }
@@ -262,7 +280,6 @@ export default function CaptureScreen() {
 
   const swapImageWithMain = (tappedSmallImageIndexInSlice: number) => {
     if (!currentQuestionId || !currentImages || currentImages.length <= 1 || isAnalyzing) {
-      // Cannot swap if no ID, <= 1 image, or currently analyzing
       return;
     }
 
@@ -270,41 +287,39 @@ export default function CaptureScreen() {
 
     if (actualIndexInFullArray <= 0 || actualIndexInFullArray >= currentImages.length) {
       console.warn("Invalid index for image swap:", actualIndexInFullArray);
-      return; // Index out of bounds or trying to swap the main image with itself
+      return;
     }
 
-    const updatedImages = [...currentImages]; // Create a mutable copy
-
-    // Simple swap using array destructuring
+    const updatedImages = [...currentImages];
     [updatedImages[0], updatedImages[actualIndexInFullArray]] = [updatedImages[actualIndexInFullArray], updatedImages[0]];
-
-    // Update the state via context
     updateQuestionImages(currentQuestionId, updatedImages);
   };
 
   const handleNext = async () => {
-    if (isAnalyzing) return; // Prevent multiple clicks
+    if (isAnalyzing) return;
 
     if (currentImages.length === 0) {
       Alert.alert('No Images', 'Please take at least one photo before proceeding.', [{ text: 'OK' }]);
       return;
     }
 
-    setIsAnalyzing(true);
-    setFeedbackMessage(null); // Clear previous feedback
+    setIsAnalyzing(true); // <-- Start analyzing, triggers useEffect for progress bar
+    setFeedbackMessage(null);
 
     try {
       const response = await sendImagesToOpenAIWithBase64(currentImages, currentAnalyticalQuestion);
+
+      // --- Analysis complete ---
+      setIsAnalyzing(false); // <-- Stop analyzing *before* navigation/modal logic
 
       if (response) {
         setAnswerForQuestion(currentQuestionId, response.answer);
 
         if (response.isComplete) {
           markQuestionAsCompleted(currentQuestionId);
-          setFeedbackMessage(null);
-          setIsAnalyzing(false);
+          setFeedbackMessage(null); // Clear any potential pending feedback
 
-          // Navigate or show submit modal
+          // Navigate or show submit modal *after* setting isAnalyzing to false
           if (localQuestionIndex === locationQuestions.length - 1) {
             setShowSubmitModal(true);
           } else {
@@ -313,18 +328,18 @@ export default function CaptureScreen() {
         } else {
           // Analysis incomplete, show feedback
           setFeedbackMessage(response.suggestedAction || 'Please take more detailed photos.');
-          setIsAnalyzing(false); // Stop indicator after showing feedback
         }
       } else {
-        setIsAnalyzing(false); // Stop indicator
+        // Handle unexpected response (still stop analyzing)
         Alert.alert('Analysis Failed', 'Received an unexpected response from the analysis service.', [{ text: 'OK' }]);
       }
     } catch (error: any) {
-      setIsAnalyzing(false); // Ensure loading stops on error
+      setIsAnalyzing(false); // <-- Ensure analyzing stops on error
       console.error('Error sending images to OpenAI:', error);
       Alert.alert('Analysis Error', `An error occurred: ${error.message || 'Please try again.'}`, [{ text: 'OK' }]);
     }
   };
+
 
   const handlePrevious = () => {
     if (localQuestionIndex === 0 || isAnalyzing) return;
@@ -332,7 +347,8 @@ export default function CaptureScreen() {
   };
 
   const navigateToQuestion = (newIndex: number) => {
-    if (newIndex === localQuestionIndex || isAnalyzing) return; // Don't navigate if index same or analyzing
+    // Do not allow navigation *while* analyzing
+    if (newIndex === localQuestionIndex || isAnalyzing) return;
 
     const isForward = newIndex > localQuestionIndex;
     const startValue = isForward ? width : -width;
@@ -346,19 +362,34 @@ export default function CaptureScreen() {
       }),
       Animated.timing(fadeAnim, {
         toValue: 0,
-        duration: 200, // Fade out faster
+        duration: 200,
         useNativeDriver: true
       })
     ]).start(() => {
-
-      setIsAnalyzing(false);
+      // Reset state *after* animation completes
+      // setIsAnalyzing(false); // This should already be false before calling navigate
       setFeedbackMessage(null);
+      // Reset progress *after* navigation is complete and state is updated
       setAnalysisProgress(0);
       progressAnim.setValue(0);
 
       setLocalQuestionIndex(newIndex);
-
+      // Prepare for next slide-in animation
       slideAnim.setValue(startValue);
+
+      // Start the slide-in animation for the new content
+      Animated.parallel([
+        Animated.timing(slideAnim, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true
+        }),
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true
+        })
+      ]).start();
 
     });
   };
@@ -395,7 +426,7 @@ export default function CaptureScreen() {
       });
 
       console.log('Survey for location saved successfully');
-      router.push('/home/final-report'); // Navigate to report screen
+      router.push('/home/final-report');
     } catch (error) {
       console.error('Error saving survey:', error);
       Alert.alert('Save Error', 'There was a problem saving your survey. Please try again.', [{ text: 'OK' }]);
@@ -403,28 +434,8 @@ export default function CaptureScreen() {
   };
 
   const renderSmallPlaceholders = () => {
-    if (!currentImages || currentImages.length <= 1) {
-      // If there's exactly one image, show the "add" button if needed
-      if (currentImages.length === 1 && currentImages.length < 5) {
-        return (
-            <View style={styles.smallPlaceholdersContainer}>
-              <TouchableOpacity
-                  key="placeholder-add-only"
-                  style={styles.smallImageContainer}
-                  onPress={takePhoto}
-                  disabled={isAnalyzing}
-              >
-                <IconSymbol name="camera" size={30} color="grey" />
-              </TouchableOpacity>
-            </View>
-        );
-      }
-      return null;
-    }
-
-
-    const smallImagesToDisplay = currentImages.slice(1, 5);
     const canAddMore = currentImages.length < 5;
+    const smallImagesToDisplay = currentImages.slice(1, 5);
 
     return (
         <View style={styles.smallPlaceholdersContainer}>
@@ -459,17 +470,23 @@ export default function CaptureScreen() {
                 <IconSymbol name="camera" size={30} color="grey" />
               </TouchableOpacity>
           )}
+          {/* Optional empty placeholders */}
+          {/* {Array(Math.max(0, 4 - smallImagesToDisplay.length - (canAddMore ? 1 : 0))).fill(0).map((_, i) => (
+            <View key={`empty-${i}`} style={styles.smallImageContainer} />
+          ))} */}
         </View>
     );
   };
 
+
   const renderAnalysisOverlay = () => {
-    if (!isAnalyzing && analysisProgress < 100) return null;
+    // Only show the overlay if isAnalyzing is true
+    if (!isAnalyzing) return null;
 
     const progressWidth = progressAnim.interpolate({
       inputRange: [0, 1],
       outputRange: ['0%', '100%'],
-      extrapolate: 'clamp' // Prevent extrapolation beyond 100%
+      extrapolate: 'clamp'
     });
 
     return (
@@ -495,8 +512,10 @@ export default function CaptureScreen() {
               onSubmit={handleSubmit}
           />
 
+          {/* Render overlay based on isAnalyzing state */}
           {renderAnalysisOverlay()}
 
+          {/* Animated content block */}
           <Animated.View
               style={[
                 styles.contentContainer,
@@ -506,69 +525,68 @@ export default function CaptureScreen() {
                 }
               ]}
           >
-            {/* Moved header up, outside of the scroll view */}
-            <View style={styles.header}>
-              <ThemedText style={styles.headerText}>{currentDisplayText}</ThemedText>
-              {currentSubtext ? (
-                  <View style={styles.subtextContainer}>
-                    <ThemedText style={styles.subtextText}>{currentSubtext}</ThemedText>
+            {/* Wrap main content to push progress bar down */}
+            <View style={styles.mainContent}>
+              <View style={styles.header}>
+                <ThemedText style={styles.headerText}>{currentDisplayText}</ThemedText>
+                {currentSubtext ? (
+                    <View style={styles.subtextContainer}>
+                      <ThemedText style={styles.subtextText}>{currentSubtext}</ThemedText>
+                    </View>
+                ) : null}
+              </View>
+
+              <View style={styles.imageRowContainer}>
+                <TouchableOpacity
+                    style={styles.imagePlaceholder}
+                    onPress={currentImages.length === 0 ? takePhoto : undefined}
+                    disabled={isAnalyzing || currentImages.length > 0}
+                >
+                  {currentImages.length > 0 ? (
+                      <View style={styles.mainImageContainer}>
+                        <Image source={{ uri: currentImages[0] }} style={styles.image} />
+                        <TouchableOpacity
+                            style={styles.deleteImageButton}
+                            onPress={() => deleteImage(0)}
+                            disabled={isAnalyzing}
+                        >
+                          <IconSymbol name="xmark.circle.fill" size={24} color="#FF5A00" />
+                        </TouchableOpacity>
+                      </View>
+                  ) : (
+                      <IconSymbol name="camera" size={80} color="grey" />
+                  )}
+                </TouchableOpacity>
+                {renderSmallPlaceholders()}
+              </View>
+
+
+              {feedbackMessage && (
+                  <View style={styles.feedbackContainer}>
+                    <IconSymbol name="exclamationmark.triangle" size={24} color="#FF5A00" />
+                    <ThemedText style={styles.feedbackText}>{feedbackMessage}</ThemedText>
                   </View>
-              ) : null}
+              )}
+
+              <TouchableOpacity
+                  style={styles.skipButton}
+                  onPress={skipQuestion}
+                  disabled={isAnalyzing}
+              >
+                <ThemedText style={styles.skipButtonText}>Skip Question</ThemedText>
+              </TouchableOpacity>
             </View>
 
-            {/* Main Image Area */}
-            <TouchableOpacity
-                style={styles.imagePlaceholder}
-
-                onPress={currentImages.length === 0 ? takePhoto : undefined}
-                disabled={isAnalyzing || currentImages.length > 0} // Disable if analyzing or if images exist (no action needed on main image press)
-            >
-              {currentImages.length > 0 ? (
-                  <View style={styles.mainImageContainer}>
-                    <Image source={{ uri: currentImages[0] }} style={styles.image} />
-                    {/* Delete button for the main image */}
-                    <TouchableOpacity
-                        style={styles.deleteImageButton}
-                        onPress={() => deleteImage(0)} // Delete image at index 0
-                        disabled={isAnalyzing} // Disable delete while analyzing
-                    >
-                      <IconSymbol name="xmark.circle.fill" size={24} color="#FF5A00" />
-                    </TouchableOpacity>
-                  </View>
-              ) : (
-                  // Placeholder shown only when currentImages.length === 0
-                  <IconSymbol name="camera" size={100} color="grey" />
-              )}
-            </TouchableOpacity>
-
-            {renderSmallPlaceholders()}
-
-            {feedbackMessage && (
-                <View style={styles.feedbackContainer}>
-                  <IconSymbol name="exclamationmark.triangle" size={24} color="#FF5A00" />
-                  <ThemedText style={styles.feedbackText}>{feedbackMessage}</ThemedText>
-                </View>
-            )}
-
-            {/* Skip button */}
-            <TouchableOpacity
-                style={styles.skipButton}
-                onPress={skipQuestion}
-                disabled={isAnalyzing}
-            >
-              <ThemedText style={styles.skipButtonText}>Skip Question</ThemedText>
-            </TouchableOpacity>
-
+            {/* Progress bar */}
             <View style={styles.progressContainer}>
               <View style={styles.progressDotsContainer}>
-                {/* Previous */}
                 <TouchableOpacity
                     style={[
                       styles.backButton,
                       localQuestionIndex === 0 && styles.disabledButton
                     ]}
                     onPress={handlePrevious}
-                    disabled={localQuestionIndex === 0}
+                    disabled={localQuestionIndex === 0 || isAnalyzing}
                 >
                   <IconSymbol
                       name="chevron.left"
@@ -581,9 +599,8 @@ export default function CaptureScreen() {
                   />
                 </TouchableOpacity>
 
-                {/* Dots */}
                 {locationQuestions.map((_, index) => (
-                    <View
+                    <Animated.View
                         key={index}
                         style={[
                           styles.progressDot,
@@ -595,13 +612,19 @@ export default function CaptureScreen() {
                     />
                 ))}
 
-                {/* Next */}
                 <TouchableOpacity
-                    style={styles.backButton}
+                    style={[
+                      styles.backButton,
+                      isAnalyzing && styles.disabledButton // Disable next button while analyzing
+                    ]}
                     onPress={handleNext}
-                    disabled={isAnalyzing}
+                    disabled={isAnalyzing} // Also disable touchable opacity
                 >
-                  <IconSymbol name="chevron.right" size={24} color="#FFFFFF" />
+                  <IconSymbol
+                      name="chevron.right"
+                      size={24}
+                      color={ isAnalyzing ? 'rgba(255, 255, 255, 0.5)' : '#FFFFFF' }
+                  />
                 </TouchableOpacity>
               </View>
             </View>
@@ -613,36 +636,27 @@ export default function CaptureScreen() {
 
 const styles = StyleSheet.create({
   safeArea: {
-    flex: 1
+    flex: 1,
+    backgroundColor: 'white',
   },
   container: {
     flex: 1,
-    alignItems: 'center',
     padding: 16,
-    overflow: 'hidden'
+    overflow: 'hidden',
+    position: 'relative',
   },
   contentContainer: {
     flex: 1,
     width: '100%',
-    alignItems: 'center'
+    alignItems: 'center',
+    justifyContent: 'flex-start',
   },
-  progressContainer: {
+  mainContent: {
     width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'flex-end',
-    paddingVertical: 30,
-    gap: 5,
-    marginTop: 'auto',
-  },
-  progressDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6
+    alignItems: 'center',
   },
   header: {
     width: '100%',
-    marginTop: -15,
     marginBottom: 10,
     alignItems: 'center',
     justifyContent: 'center'
@@ -653,37 +667,49 @@ const styles = StyleSheet.create({
     textAlign: 'center'
   },
   subtextContainer: {
-    marginTop: -3,
-    paddingHorizontal: 16
+    marginTop: 2,
+    paddingHorizontal: 10
   },
   subtextText: {
     fontSize: 14,
     color: '#666',
     textAlign: 'center'
   },
-  imagePlaceholder: {
+  imageRowContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'center',
     width: '100%',
-    height: '50%',
+    height: IMAGE_AREA_HEIGHT,
+    marginBottom: 16,
+    gap: 16,
+  },
+  imagePlaceholder: {
+    width: '70%', // Keep aspect ratio consistent
+    height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
     borderColor: 'grey',
-    borderStyle: 'dashed'
+    borderStyle: 'dashed',
   },
   mainImageContainer: {
     width: '100%',
     height: '100%',
-    position: 'relative'
+    position: 'relative',
+    overflow: 'hidden',
   },
   image: {
     width: '100%',
     height: '100%',
-    resizeMode: 'cover'
+    resizeMode: 'cover',
   },
   smallPlaceholdersContainer: {
-    flexDirection: 'row',
-    marginTop: 16,
-    gap: 8
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    height: '100%',
+    width: 90,
+    gap: 8,
   },
   smallImageContainer: {
     width: 80,
@@ -693,36 +719,62 @@ const styles = StyleSheet.create({
     borderStyle: 'dashed',
     alignItems: 'center',
     justifyContent: 'center',
-    position: 'relative'
+    position: 'relative',
+    overflow: 'hidden',
   },
   smallImage: {
     width: '100%',
     height: '100%',
-    resizeMode: 'cover'
+    resizeMode: 'cover',
   },
   deleteImageButton: {
     position: 'absolute',
-    top: -10,
-    right: -10,
+    top: 5,
+    right: 5,
     backgroundColor: 'white',
     borderRadius: 12,
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
     elevation: 3,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
     shadowRadius: 1,
   },
-  backButton: {
-    backgroundColor: '#023866',
-    width: 'auto',
-    paddingHorizontal: 10,
-    height: 40,
-    borderRadius: 20,
+  feedbackContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center'
+    backgroundColor: '#FFF5F0',
+    borderWidth: 1,
+    borderColor: '#FF5A00',
+    borderRadius: 8,
+    padding: 12,
+    marginTop: 16,
+    width: '100%'
   },
-  disabledButton: {
-    backgroundColor: 'rgba(2, 56, 102, 0.5)'
+  feedbackText: {
+    color: '#FF5A00',
+    marginLeft: 8,
+    flex: 1
+  },
+  skipButton: {
+    backgroundColor: '#E0E0E0',
+    paddingVertical: 6, // Adjusted padding for better touch area
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    marginTop: 10, // Adjusted margin
+    alignSelf: 'center'
+  },
+  skipButtonText: {
+    color: '#666',
+    fontWeight: '500'
+  },
+  progressContainer: {
+    width: '100%',
+    paddingVertical: 10,
+    // marginTop: 'auto', // Pushes to the bottom within the flex container
   },
   progressDotsContainer: {
     flexDirection: 'row',
@@ -730,14 +782,32 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8
   },
+  progressDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6
+  },
+  backButton: {
+    backgroundColor: '#023866',
+    paddingHorizontal: 10,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 40,
+  },
+  disabledButton: {
+    backgroundColor: 'rgba(2, 56, 102, 0.5)'
+  },
   overlayContainer: {
+    // Position absolutely to cover the entire screen
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
     backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    zIndex: 10,
+    zIndex: 10, // Ensure it's above other content
     justifyContent: 'center',
     alignItems: 'center'
   },
@@ -770,32 +840,4 @@ const styles = StyleSheet.create({
     marginTop: 8,
     fontSize: 14
   },
-  feedbackContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFF5F0',
-    borderWidth: 1,
-    borderColor: '#FF5A00',
-    borderRadius: 8,
-    padding: 12,
-    marginTop: 16,
-    width: '100%'
-  },
-  feedbackText: {
-    color: '#FF5A00',
-    marginLeft: 8,
-    flex: 1
-  },
-  skipButton: {
-    backgroundColor: '#E0E0E0',
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 8,
-    marginTop: 5,
-    alignSelf: 'center'
-  },
-  skipButtonText: {
-    color: '#666',
-    fontWeight: '500'
-  }
 });
