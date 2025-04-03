@@ -117,76 +117,56 @@ export default function CaptureScreen() {
 
   }, [localQuestionIndex, currentQuestionId]);
 
-
-  // Animate progress bar when analyzing
-  // Animate progress bar when analyzing
   useEffect(() => {
-    let progressTimerRef: Animated.CompositeAnimation | null = null; // Use a local ref for the timer instance within this effect run
+    let progressTimerRef: Animated.CompositeAnimation | null = null;
     let intervalId: NodeJS.Timeout | null = null;
 
     if (isAnalyzing) {
       progressAnim.setValue(0);
-      setAnalysisProgress(0); // Reset progress when starting
+      setAnalysisProgress(0);
 
-      // Start the fake progress animation
-      // Assign to the local ref
       progressTimerRef = Animated.timing(progressAnim, {
-        toValue: 0.9, // Animate to 90%
-        duration: 6000, // Over 6 seconds
+        toValue: 0.9,
+        duration: 6000,
         useNativeDriver: false
       });
       progressTimerRef.start();
 
-      // Update the percentage text
       intervalId = setInterval(() => {
         setAnalysisProgress(prev => {
           if (prev < 90) {
-            return prev + 5; // Increment progress text
+            return prev + 5;
           }
-          // Use type assertion for clearInterval if needed, or check if it's Node/Browser specific
-          if (intervalId) clearInterval(intervalId as any); // Stop interval at 90%
+          if (intervalId) clearInterval(intervalId as any);
           return prev;
         });
       }, 300);
 
     } else {
-      // If analysis stopped (either success or failure), handle visual snapping
-      // No need to stop the timer here; the cleanup function handles it.
 
-      // Snap the progress bar to 100% visually *if* it had started
       if (analysisProgress > 0) {
         Animated.timing(progressAnim, {
           toValue: 1,
-          duration: 200, // Quick snap animation
+          duration: 200,
           useNativeDriver: false
         }).start(() => {
-          setAnalysisProgress(100); // Set text to 100% after snap
-          // Optionally reset progress after a short delay if needed,
-          // although it will reset when isAnalyzing becomes true again.
-          // setTimeout(() => {
-          //     progressAnim.setValue(0);
-          //     setAnalysisProgress(0);
-          // }, 500); // Reset after 500ms delay
+          setAnalysisProgress(100);
         });
       } else {
-        // If analysis was stopped before it even started visually, reset progress immediately
         progressAnim.setValue(0);
         setAnalysisProgress(0);
       }
     }
 
-    // Cleanup function: Runs when isAnalyzing changes or component unmounts
     return () => {
-      // Stop the timer *associated with this specific effect run* if it exists
       if (progressTimerRef) {
         progressTimerRef.stop();
       }
-      // Clear the interval associated with this specific effect run if it exists
       if (intervalId) {
-        clearInterval(intervalId as any); // Use type assertion if needed
+        clearInterval(intervalId as any);
       }
     };
-  }, [isAnalyzing, progressAnim]); // progressAnim added as dependency
+  }, [isAnalyzing, progressAnim]);
 
 
   const skipQuestion = () => {
@@ -303,38 +283,34 @@ export default function CaptureScreen() {
       return;
     }
 
-    setIsAnalyzing(true); // <-- Start analyzing, triggers useEffect for progress bar
+    setIsAnalyzing(true);
     setFeedbackMessage(null);
 
     try {
       const response = await sendImagesToOpenAIWithBase64(currentImages, currentAnalyticalQuestion);
 
-      // --- Analysis complete ---
-      setIsAnalyzing(false); // <-- Stop analyzing *before* navigation/modal logic
+      setIsAnalyzing(false);
 
       if (response) {
         setAnswerForQuestion(currentQuestionId, response.answer);
 
         if (response.isComplete) {
           markQuestionAsCompleted(currentQuestionId);
-          setFeedbackMessage(null); // Clear any potential pending feedback
+          setFeedbackMessage(null);
 
-          // Navigate or show submit modal *after* setting isAnalyzing to false
           if (localQuestionIndex === locationQuestions.length - 1) {
             setShowSubmitModal(true);
           } else {
             navigateToQuestion(localQuestionIndex + 1);
           }
         } else {
-          // Analysis incomplete, show feedback
           setFeedbackMessage(response.suggestedAction || 'Please take more detailed photos.');
         }
       } else {
-        // Handle unexpected response (still stop analyzing)
         Alert.alert('Analysis Failed', 'Received an unexpected response from the analysis service.', [{ text: 'OK' }]);
       }
     } catch (error: any) {
-      setIsAnalyzing(false); // <-- Ensure analyzing stops on error
+      setIsAnalyzing(false);
       console.error('Error sending images to OpenAI:', error);
       Alert.alert('Analysis Error', `An error occurred: ${error.message || 'Please try again.'}`, [{ text: 'OK' }]);
     }
@@ -347,7 +323,6 @@ export default function CaptureScreen() {
   };
 
   const navigateToQuestion = (newIndex: number) => {
-    // Do not allow navigation *while* analyzing
     if (newIndex === localQuestionIndex || isAnalyzing) return;
 
     const isForward = newIndex > localQuestionIndex;
@@ -366,18 +341,13 @@ export default function CaptureScreen() {
         useNativeDriver: true
       })
     ]).start(() => {
-      // Reset state *after* animation completes
-      // setIsAnalyzing(false); // This should already be false before calling navigate
       setFeedbackMessage(null);
-      // Reset progress *after* navigation is complete and state is updated
       setAnalysisProgress(0);
       progressAnim.setValue(0);
 
       setLocalQuestionIndex(newIndex);
-      // Prepare for next slide-in animation
       slideAnim.setValue(startValue);
 
-      // Start the slide-in animation for the new content
       Animated.parallel([
         Animated.timing(slideAnim, {
           toValue: 0,
@@ -470,17 +440,12 @@ export default function CaptureScreen() {
                 <IconSymbol name="camera" size={30} color="grey" />
               </TouchableOpacity>
           )}
-          {/* Optional empty placeholders */}
-          {/* {Array(Math.max(0, 4 - smallImagesToDisplay.length - (canAddMore ? 1 : 0))).fill(0).map((_, i) => (
-            <View key={`empty-${i}`} style={styles.smallImageContainer} />
-          ))} */}
         </View>
     );
   };
 
 
   const renderAnalysisOverlay = () => {
-    // Only show the overlay if isAnalyzing is true
     if (!isAnalyzing) return null;
 
     const progressWidth = progressAnim.interpolate({
@@ -512,10 +477,8 @@ export default function CaptureScreen() {
               onSubmit={handleSubmit}
           />
 
-          {/* Render overlay based on isAnalyzing state */}
           {renderAnalysisOverlay()}
 
-          {/* Animated content block */}
           <Animated.View
               style={[
                 styles.contentContainer,
@@ -525,8 +488,8 @@ export default function CaptureScreen() {
                 }
               ]}
           >
-            {/* Wrap main content to push progress bar down */}
             <View style={styles.mainContent}>
+
               <View style={styles.header}>
                 <ThemedText style={styles.headerText}>{currentDisplayText}</ThemedText>
                 {currentSubtext ? (
@@ -556,7 +519,9 @@ export default function CaptureScreen() {
                   ) : (
                       <IconSymbol name="camera" size={80} color="grey" />
                   )}
+
                 </TouchableOpacity>
+
                 {renderSmallPlaceholders()}
               </View>
 
@@ -565,6 +530,12 @@ export default function CaptureScreen() {
                   <View style={styles.feedbackContainer}>
                     <IconSymbol name="exclamationmark.triangle" size={24} color="#FF5A00" />
                     <ThemedText style={styles.feedbackText}>{feedbackMessage}</ThemedText>
+                    <TouchableOpacity
+                        style={styles.closeFeedbackButton}
+                        onPress={() => setFeedbackMessage(null)}
+                    >
+                      <IconSymbol name="xmark.circle.fill" size={24} color="#FF5A00" />
+                    </TouchableOpacity>
                   </View>
               )}
 
@@ -575,9 +546,9 @@ export default function CaptureScreen() {
               >
                 <ThemedText style={styles.skipButtonText}>Skip Question</ThemedText>
               </TouchableOpacity>
+
             </View>
 
-            {/* Progress bar */}
             <View style={styles.progressContainer}>
               <View style={styles.progressDotsContainer}>
                 <TouchableOpacity
@@ -615,10 +586,10 @@ export default function CaptureScreen() {
                 <TouchableOpacity
                     style={[
                       styles.backButton,
-                      isAnalyzing && styles.disabledButton // Disable next button while analyzing
+                      isAnalyzing && styles.disabledButton
                     ]}
                     onPress={handleNext}
-                    disabled={isAnalyzing} // Also disable touchable opacity
+                    disabled={isAnalyzing}
                 >
                   <IconSymbol
                       name="chevron.right"
@@ -628,6 +599,7 @@ export default function CaptureScreen() {
                 </TouchableOpacity>
               </View>
             </View>
+
           </Animated.View>
         </View>
       </SafeAreaView>
@@ -685,7 +657,7 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   imagePlaceholder: {
-    width: '70%', // Keep aspect ratio consistent
+    width: '70%',
     height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
@@ -751,20 +723,34 @@ const styles = StyleSheet.create({
     borderColor: '#FF5A00',
     borderRadius: 8,
     padding: 12,
+    paddingRight: 40,
     marginTop: 16,
-    width: '100%'
+    width: '100%',
+    position: 'relative',
   },
   feedbackText: {
     color: '#FF5A00',
     marginLeft: 8,
-    flex: 1
+    flex: 1,
+  },
+  closeFeedbackButton: {
+    position: 'absolute',
+    top: 5,
+    right: 5,
+    backgroundColor: 'transparent',
+    borderRadius: 12,
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1,
   },
   skipButton: {
     backgroundColor: '#E0E0E0',
-    paddingVertical: 6, // Adjusted padding for better touch area
+    paddingVertical: 6,
     paddingHorizontal: 10,
     borderRadius: 8,
-    marginTop: 10, // Adjusted margin
+    marginTop: 10,
     alignSelf: 'center'
   },
   skipButtonText: {
@@ -774,7 +760,6 @@ const styles = StyleSheet.create({
   progressContainer: {
     width: '100%',
     paddingVertical: 10,
-    // marginTop: 'auto', // Pushes to the bottom within the flex container
   },
   progressDotsContainer: {
     flexDirection: 'row',
@@ -800,14 +785,13 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(2, 56, 102, 0.5)'
   },
   overlayContainer: {
-    // Position absolutely to cover the entire screen
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
     backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    zIndex: 10, // Ensure it's above other content
+    zIndex: 10,
     justifyContent: 'center',
     alignItems: 'center'
   },
