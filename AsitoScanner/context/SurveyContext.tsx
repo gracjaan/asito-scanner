@@ -29,6 +29,8 @@ type SurveyContextType = {
   setSurveyDate: (date: string) => void;
   setSurveyStatus: (status: string) => void;
   setSurveyDescription: (description: string) => void;
+  removeImageFromQuestion: (questionId: string, imageIndex: number) => void;
+  updateQuestionImages: (questionId: string, newImages: string[]) => void;
 };
 
 const SurveyContext = createContext<SurveyContextType>({
@@ -48,6 +50,8 @@ const SurveyContext = createContext<SurveyContextType>({
   setSurveyDate: () => {},
   setSurveyStatus: () => {},
   setSurveyDescription: () => {},
+  removeImageFromQuestion: () => {},
+  updateQuestionImages: () => {},
 });
 
 // Define a type for location prompts
@@ -433,6 +437,29 @@ export const SurveyProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     );
   };
 
+  const removeImageFromQuestion = (questionId: string, imageIndex: number) => {
+    setQuestions(prevQuestions =>
+        prevQuestions.map(q => {
+          if (q.id === questionId) {
+            const updatedImages = [...(q.images || [])]; // Create a copy
+            if (imageIndex >= 0 && imageIndex < updatedImages.length) {
+              updatedImages.splice(imageIndex, 1); // Remove the image
+            }
+            return { ...q, images: updatedImages };
+          }
+          return q;
+        })
+    );
+  };
+
+  const updateQuestionImages = (questionId: string, newImages: string[]) => {
+    setQuestions(prevQuestions =>
+        prevQuestions.map(q =>
+            q.id === questionId ? { ...q, images: newImages } : q
+        )
+    );
+  };
+
   const setAnswerForQuestion = (questionId: string, answer: string) => {
     setQuestions(prevQuestions =>
         prevQuestions.map(q =>
@@ -467,6 +494,8 @@ export const SurveyProvider: React.FC<{ children: ReactNode }> = ({ children }) 
             setSurveyDate,
             setSurveyStatus,
             setSurveyDescription,
+            removeImageFromQuestion,
+            updateQuestionImages,
           }}
       >
         {children}
