@@ -627,13 +627,13 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   progressContainer: {
-    flex: 1,
     width: '100%',
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'flex-end',
-    paddingVertical: 100,
-    gap: 8
+    paddingVertical: 30,
+    gap: 5,
+    marginTop: 'auto',
   },
   progressDot: {
     width: 12,
@@ -642,7 +642,7 @@ const styles = StyleSheet.create({
   },
   header: {
     width: '100%',
-    marginTop: 10,
+    marginTop: -15,
     marginBottom: 10,
     alignItems: 'center',
     justifyContent: 'center'
@@ -653,11 +653,11 @@ const styles = StyleSheet.create({
     textAlign: 'center'
   },
   subtextContainer: {
-    marginTop: 3,
+    marginTop: -3,
     paddingHorizontal: 16
   },
   subtextText: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#666',
     textAlign: 'center'
   },
@@ -788,10 +788,10 @@ const styles = StyleSheet.create({
   },
   skipButton: {
     backgroundColor: '#E0E0E0',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
     borderRadius: 8,
-    marginTop: 16,
+    marginTop: 5,
     alignSelf: 'center'
   },
   skipButtonText: {
