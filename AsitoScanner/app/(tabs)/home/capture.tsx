@@ -1,5 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, View, Image, TouchableOpacity, ActivityIndicator, Animated, Dimensions, Alert } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Image,
+  TouchableOpacity,
+  ActivityIndicator,
+  Animated,
+  Dimensions,
+  Alert,
+  Modal,
+  ScrollView,
+  Pressable,
+  Text, // Added Text temporarily if needed for debugging
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -39,7 +52,6 @@ export default function CaptureScreen() {
     updateQuestionImages,
     userName,
     surveyDate,
-    surveyStatus,
     surveyDescription
   } = useSurvey();
 
@@ -68,23 +80,18 @@ export default function CaptureScreen() {
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [analysisProgress, setAnalysisProgress] = useState(0);
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
+  const [isInfoModalVisible, setIsInfoModalVisible] = useState(false);
 
   const progressAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(width)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
-  const currentDisplayText =
-      locationQuestions[localQuestionIndex]?.displayText ||
-      locationQuestions[localQuestionIndex]?.text ||
-      '';
-  const currentSubtext =
-      locationQuestions[localQuestionIndex]?.subtext || '';
-  const currentAnalyticalQuestion =
-      locationQuestions[localQuestionIndex]?.analyticalQuestion ||
-      locationQuestions[localQuestionIndex]?.text ||
-      '';
-  const currentImages = locationQuestions[localQuestionIndex]?.images || [];
-  const currentQuestionId = locationQuestions[localQuestionIndex]?.id || '';
+  const currentQuestion = locationQuestions[localQuestionIndex];
+  const currentDisplayText = currentQuestion?.displayText || currentQuestion?.text || '';
+  const currentSubtext = currentQuestion?.subtext || '';
+  const currentAnalyticalQuestion = currentQuestion?.analyticalQuestion || currentQuestion?.text || '';
+  const currentImages = currentQuestion?.images || [];
+  const currentQuestionId = currentQuestion?.id || '';
 
   const [dotStyles, setDotStyles] = useState(() =>
       Array(locationQuestions.length)
@@ -97,20 +104,14 @@ export default function CaptureScreen() {
 
 
   useEffect(() => {
+    if (locationQuestions.length === 0) return;
+
     slideAnim.setValue(width);
     fadeAnim.setValue(0);
 
     Animated.parallel([
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true
-      }),
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true
-      })
+      Animated.timing(slideAnim, { toValue: 0, duration: 300, useNativeDriver: true }),
+      Animated.timing(fadeAnim, { toValue: 1, duration: 300, useNativeDriver: true })
     ]).start();
 
     updateDotStyles(localQuestionIndex);
@@ -125,33 +126,21 @@ export default function CaptureScreen() {
       progressAnim.setValue(0);
       setAnalysisProgress(0);
 
-      progressTimerRef = Animated.timing(progressAnim, {
-        toValue: 0.9,
-        duration: 6000,
-        useNativeDriver: false
-      });
+      progressTimerRef = Animated.timing(progressAnim, { toValue: 0.9, duration: 6000, useNativeDriver: false });
       progressTimerRef.start();
 
       intervalId = setInterval(() => {
         setAnalysisProgress(prev => {
-          if (prev < 90) {
-            return prev + 5;
-          }
-          if (intervalId) clearInterval(intervalId as any);
+          if (prev < 90) return prev + 5;
+          if (intervalId) clearInterval(intervalId);
           return prev;
         });
       }, 300);
 
     } else {
-
-      if (analysisProgress > 0) {
-        Animated.timing(progressAnim, {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: false
-        }).start(() => {
-          setAnalysisProgress(100);
-        });
+      if (analysisProgress > 0 && analysisProgress < 100) {
+        Animated.timing(progressAnim, { toValue: 1, duration: 200, useNativeDriver: false })
+            .start(() => setAnalysisProgress(100));
       } else {
         progressAnim.setValue(0);
         setAnalysisProgress(0);
@@ -159,12 +148,8 @@ export default function CaptureScreen() {
     }
 
     return () => {
-      if (progressTimerRef) {
-        progressTimerRef.stop();
-      }
-      if (intervalId) {
-        clearInterval(intervalId as any);
-      }
+      if (progressTimerRef) progressTimerRef.stop();
+      if (intervalId) clearInterval(intervalId);
     };
   }, [isAnalyzing, progressAnim]);
 
@@ -186,7 +171,7 @@ export default function CaptureScreen() {
           ? currentStyles
           : Array(requiredLength).fill({ scale: 1, color: DOT_COLORS.INACTIVE });
 
-      return adjustedStyles.map((_, i) => {
+      return adjustedStyles.map((style, i) => {
         const question = locationQuestions[i];
         if (i === newIndex) {
           return { scale: 1.3, color: DOT_COLORS.ACTIVE };
@@ -223,11 +208,8 @@ export default function CaptureScreen() {
       });
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
-        const imageUri = result.assets[0].uri;
-        if (currentQuestionId) {
-          addImageToQuestion(currentQuestionId, imageUri);
-          setFeedbackMessage(null);
-        }
+        addImageToQuestion(currentQuestionId, result.assets[0].uri);
+        setFeedbackMessage(null);
       }
     } catch (error) {
       console.error("Error launching camera:", error);
@@ -239,35 +221,16 @@ export default function CaptureScreen() {
     if (isAnalyzing) return;
 
     Alert.alert(
-        'Delete Image',
-        'Are you sure you want to delete this image?',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          {
-            text: 'Delete',
-            style: 'destructive',
-            onPress: () => {
-              if (currentQuestionId) {
-                removeImageFromQuestion(currentQuestionId, imageIndex);
-              }
-            }
-          }
-        ],
+        'Delete Image', 'Are you sure you want to delete this image?',
+        [{ text: 'Cancel', style: 'cancel' }, { text: 'Delete', style: 'destructive', onPress: () => removeImageFromQuestion(currentQuestionId, imageIndex) }],
         { cancelable: true }
     );
   };
 
   const swapImageWithMain = (tappedSmallImageIndexInSlice: number) => {
-    if (!currentQuestionId || !currentImages || currentImages.length <= 1 || isAnalyzing) {
-      return;
-    }
-
+    if (!currentQuestionId || !currentImages || currentImages.length <= 1 || isAnalyzing) return;
     const actualIndexInFullArray = tappedSmallImageIndexInSlice + 1;
-
-    if (actualIndexInFullArray <= 0 || actualIndexInFullArray >= currentImages.length) {
-      console.warn("Invalid index for image swap:", actualIndexInFullArray);
-      return;
-    }
+    if (actualIndexInFullArray <= 0 || actualIndexInFullArray >= currentImages.length) return;
 
     const updatedImages = [...currentImages];
     [updatedImages[0], updatedImages[actualIndexInFullArray]] = [updatedImages[actualIndexInFullArray], updatedImages[0]];
@@ -276,7 +239,6 @@ export default function CaptureScreen() {
 
   const handleNext = async () => {
     if (isAnalyzing) return;
-
     if (currentImages.length === 0) {
       Alert.alert('No Images', 'Please take at least one photo before proceeding.', [{ text: 'OK' }]);
       return;
@@ -287,7 +249,6 @@ export default function CaptureScreen() {
 
     try {
       const response = await sendImagesToOpenAIWithBase64(currentImages, currentAnalyticalQuestion);
-
       setIsAnalyzing(false);
 
       if (response) {
@@ -296,7 +257,6 @@ export default function CaptureScreen() {
         if (response.isComplete) {
           markQuestionAsCompleted(currentQuestionId);
           setFeedbackMessage(null);
-
           if (localQuestionIndex === locationQuestions.length - 1) {
             setShowSubmitModal(true);
           } else {
@@ -315,7 +275,6 @@ export default function CaptureScreen() {
     }
   };
 
-
   const handlePrevious = () => {
     if (localQuestionIndex === 0 || isAnalyzing) return;
     navigateToQuestion(localQuestionIndex - 1);
@@ -329,37 +288,18 @@ export default function CaptureScreen() {
     const endValue = isForward ? -width : width;
 
     Animated.parallel([
-      Animated.timing(slideAnim, {
-        toValue: endValue,
-        duration: 300,
-        useNativeDriver: true
-      }),
-      Animated.timing(fadeAnim, {
-        toValue: 0,
-        duration: 200,
-        useNativeDriver: true
-      })
+      Animated.timing(slideAnim, { toValue: endValue, duration: 300, useNativeDriver: true }),
+      Animated.timing(fadeAnim, { toValue: 0, duration: 200, useNativeDriver: true })
     ]).start(() => {
       setFeedbackMessage(null);
       setAnalysisProgress(0);
       progressAnim.setValue(0);
-
       setLocalQuestionIndex(newIndex);
       slideAnim.setValue(startValue);
-
       Animated.parallel([
-        Animated.timing(slideAnim, {
-          toValue: 0,
-          duration: 300,
-          useNativeDriver: true
-        }),
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 300,
-          useNativeDriver: true
-        })
+        Animated.timing(slideAnim, { toValue: 0, duration: 300, useNativeDriver: true }),
+        Animated.timing(fadeAnim, { toValue: 1, duration: 300, useNativeDriver: true })
       ]).start();
-
     });
   };
 
@@ -409,49 +349,30 @@ export default function CaptureScreen() {
     return (
         <View style={styles.smallPlaceholdersContainer}>
           {smallImagesToDisplay.map((img, index) => (
-              <TouchableOpacity
-                  key={`small-img-${index}`}
-                  onPress={() => swapImageWithMain(index)}
-                  disabled={isAnalyzing}
-              >
+              <TouchableOpacity key={`small-img-${index}`} onPress={() => swapImageWithMain(index)} disabled={isAnalyzing}>
                 <View style={styles.smallImageContainer}>
                   <Image source={{ uri: img }} style={styles.smallImage} />
-                  <TouchableOpacity
-                      style={styles.deleteImageButton}
-                      onPress={(e) => {
-                        e.stopPropagation();
-                        deleteImage(index + 1);
-                      }}
-                      disabled={isAnalyzing}
-                  >
+                  <TouchableOpacity style={styles.deleteImageButton} onPress={(e) => { e.stopPropagation(); deleteImage(index + 1); }} disabled={isAnalyzing}>
                     <IconSymbol name="xmark.circle.fill" size={24} color="#FF5A00" />
                   </TouchableOpacity>
                 </View>
               </TouchableOpacity>
           ))}
           {canAddMore && (
-              <TouchableOpacity
-                  key="placeholder-add"
-                  style={styles.smallImageContainer}
-                  onPress={takePhoto}
-                  disabled={isAnalyzing}
-              >
+              <TouchableOpacity key="placeholder-add" style={[styles.smallImageContainer, styles.addPlaceholder]} onPress={takePhoto} disabled={isAnalyzing}>
                 <IconSymbol name="camera" size={30} color="grey" />
               </TouchableOpacity>
           )}
+          {Array.from({ length: Math.max(0, 4 - smallImagesToDisplay.length - (canAddMore ? 1 : 0)) }).map((_, emptyIndex) => (
+              <View key={`empty-placeholder-${emptyIndex}`} style={[styles.smallImageContainer, styles.emptyPlaceholder]} />
+          ))}
         </View>
     );
   };
 
-
   const renderAnalysisOverlay = () => {
     if (!isAnalyzing) return null;
-
-    const progressWidth = progressAnim.interpolate({
-      inputRange: [0, 1],
-      outputRange: ['0%', '100%'],
-      extrapolate: 'clamp'
-    });
+    const progressWidth = progressAnim.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'], extrapolate: 'clamp' });
 
     return (
         <View style={styles.overlayContainer}>
@@ -467,138 +388,153 @@ export default function CaptureScreen() {
     );
   };
 
+  const renderInfoModal = () => (
+      <Modal
+          animationType="fade"
+          transparent={true}
+          visible={isInfoModalVisible}
+          onRequestClose={() => setIsInfoModalVisible(false)}
+      >
+        <Pressable style={styles.modalOverlay} onPress={() => setIsInfoModalVisible(false)}>
+          <Pressable style={styles.modalContentContainer} onPress={(e) => e.stopPropagation()}>
+            <ScrollView contentContainerStyle={styles.modalScrollView}>
+              <View style={styles.modalHeader}>
+                <ThemedText style={styles.modalTitle}>Photo Taking Tips</ThemedText>
+                <TouchableOpacity onPress={() => setIsInfoModalVisible(false)} style={styles.modalCloseButtonIcon}>
+                  <IconSymbol name="xmark.circle.fill" size={28} color="#666" />
+                </TouchableOpacity>
+              </View>
+              <ThemedText style={styles.modalTextIntro}>
+                To help the AI analyze the images effectively, please follow these tips:
+              </ThemedText>
+              <View style={styles.tipItem}><IconSymbol name="lightbulb.fill" size={18} color="#FF5A00" style={styles.tipIcon}/><ThemedText style={styles.modalText}><ThemedText style={styles.boldText}>Good Lighting:</ThemedText> Ensure the area is well-lit. Avoid shadows or direct glare if possible.</ThemedText></View>
+              <View style={styles.tipItem}><IconSymbol name="camera.metering.center.weighted" size={18} color="#FF5A00" style={styles.tipIcon}/><ThemedText style={styles.modalText}><ThemedText style={styles.boldText}>Focus:</ThemedText> Make sure the subject of the photo is clear and in focus. Tap the screen to focus if needed.</ThemedText></View>
+              <View style={styles.tipItem}><IconSymbol name="arrow.up.left.and.down.right.magnifyingglass" size={18} color="#FF5A00" style={styles.tipIcon}/><ThemedText style={styles.modalText}><ThemedText style={styles.boldText}>Framing:</ThemedText> Capture the entire relevant item or area mentioned in the question. Don't cut off important parts.</ThemedText></View>
+              <View style={styles.tipItem}><IconSymbol name="rectangle.stack" size={18} color="#FF5A00" style={styles.tipIcon}/><ThemedText style={styles.modalText}><ThemedText style={styles.boldText}>Multiple Angles (if needed):</ThemedText> Sometimes, photos from different angles help provide more context. Use the small image slots.</ThemedText></View>
+              <View style={styles.tipItem}><IconSymbol name="photo.on.rectangle" size={18} color="#FF5A00" style={styles.tipIcon}/><ThemedText style={styles.modalText}><ThemedText style={styles.boldText}>Main Image:</ThemedText> Use the large placeholder for the primary, most representative photo.</ThemedText></View>
+              <TouchableOpacity style={styles.modalCloseButton} onPress={() => setIsInfoModalVisible(false)}>
+                <ThemedText style={styles.modalCloseButtonText}>Got it!</ThemedText>
+              </TouchableOpacity>
+            </ScrollView>
+          </Pressable>
+        </Pressable>
+      </Modal>
+  );
+
+
   return (
       <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
         <View style={styles.container}>
-          <SubmitModal
-              visible={showSubmitModal}
-              onCancel={() => setShowSubmitModal(false)}
-              onSubmit={handleSubmit}
-          />
 
+          {/* Skip Icon Button */}
+          <TouchableOpacity
+              style={styles.skipIconButton}
+              onPress={skipQuestion}
+              disabled={isAnalyzing}
+          >
+            <IconSymbol name="forward.fill" size={28} color={isAnalyzing ? '#ccc' : '#666'} />
+          </TouchableOpacity>
+
+          {/* Info Button */}
+          <TouchableOpacity
+              style={styles.infoButton}
+              onPress={() => setIsInfoModalVisible(true)}
+              disabled={isAnalyzing}
+          >
+            <IconSymbol name="info.circle" size={28} color={isAnalyzing ? '#ccc' : '#023866'} />
+          </TouchableOpacity>
+
+          <SubmitModal visible={showSubmitModal} onCancel={() => setShowSubmitModal(false)} onSubmit={handleSubmit} />
+          {renderInfoModal()}
           {renderAnalysisOverlay()}
 
           <Animated.View
-              style={[
-                styles.contentContainer,
-                {
-                  transform: [{ translateX: slideAnim }],
-                  opacity: fadeAnim
-                }
-              ]}
+              style={[ styles.contentContainer, { transform: [{ translateX: slideAnim }], opacity: fadeAnim } ]}
           >
-            <View style={styles.mainContent}>
-
-              <View style={styles.header}>
-                <ThemedText style={styles.headerText}>{currentDisplayText}</ThemedText>
-                {currentSubtext ? (
-                    <View style={styles.subtextContainer}>
-                      <ThemedText style={styles.subtextText}>{currentSubtext}</ThemedText>
+            {locationQuestions.length > 0 ? (
+                <>
+                  <View style={styles.mainContent}>
+                    <View style={styles.header}>
+                      <ThemedText style={styles.headerText}>{currentDisplayText}</ThemedText>
+                      {currentSubtext ? (
+                          <View style={styles.subtextContainer}>
+                            <ThemedText style={styles.subtextText}>{currentSubtext}</ThemedText>
+                          </View>
+                      ) : null}
                     </View>
-                ) : null}
-              </View>
 
-              <View style={styles.imageRowContainer}>
-                <TouchableOpacity
-                    style={styles.imagePlaceholder}
-                    onPress={currentImages.length === 0 ? takePhoto : undefined}
-                    disabled={isAnalyzing || currentImages.length > 0}
-                >
-                  {currentImages.length > 0 ? (
-                      <View style={styles.mainImageContainer}>
-                        <Image source={{ uri: currentImages[0] }} style={styles.image} />
-                        <TouchableOpacity
-                            style={styles.deleteImageButton}
-                            onPress={() => deleteImage(0)}
-                            disabled={isAnalyzing}
-                        >
-                          <IconSymbol name="xmark.circle.fill" size={24} color="#FF5A00" />
-                        </TouchableOpacity>
-                      </View>
-                  ) : (
-                      <IconSymbol name="camera" size={80} color="grey" />
-                  )}
+                    <View style={styles.imageRowContainer}>
+                      <TouchableOpacity
+                          style={styles.imagePlaceholder}
+                          onPress={currentImages.length === 0 ? takePhoto : undefined}
+                          disabled={isAnalyzing || currentImages.length > 0}
+                      >
+                        {currentImages.length > 0 ? (
+                            <View style={styles.mainImageContainer}>
+                              <Image source={{ uri: currentImages[0] }} style={styles.image} />
+                              <TouchableOpacity
+                                  style={styles.deleteImageButton}
+                                  onPress={() => deleteImage(0)}
+                                  disabled={isAnalyzing}
+                              >
+                                <IconSymbol name="xmark.circle.fill" size={24} color="#FF5A00" />
+                              </TouchableOpacity>
+                            </View>
+                        ) : (
+                            <IconSymbol name="camera" size={80} color="grey" />
+                        )}
+                      </TouchableOpacity>
+                      {renderSmallPlaceholders()}
+                    </View>
 
-                </TouchableOpacity>
+                    {feedbackMessage && (
+                        <View style={styles.feedbackContainer}>
+                          <IconSymbol name="exclamationmark.triangle" size={24} color="#FF5A00" style={styles.feedbackIcon} />
+                          <ThemedText style={styles.feedbackText}>{feedbackMessage}</ThemedText>
+                          <TouchableOpacity style={styles.closeFeedbackButton} onPress={() => setFeedbackMessage(null)}>
+                            <IconSymbol name="xmark.circle.fill" size={24} color="#FF5A00" />
+                          </TouchableOpacity>
+                        </View>
+                    )}
 
-                {renderSmallPlaceholders()}
-              </View>
+                    {/* Old Skip Button removed from here */}
 
-
-              {feedbackMessage && (
-                  <View style={styles.feedbackContainer}>
-                    <IconSymbol name="exclamationmark.triangle" size={24} color="#FF5A00" />
-                    <ThemedText style={styles.feedbackText}>{feedbackMessage}</ThemedText>
-                    <TouchableOpacity
-                        style={styles.closeFeedbackButton}
-                        onPress={() => setFeedbackMessage(null)}
-                    >
-                      <IconSymbol name="xmark.circle.fill" size={24} color="#FF5A00" />
-                    </TouchableOpacity>
                   </View>
-              )}
 
-              <TouchableOpacity
-                  style={styles.skipButton}
-                  onPress={skipQuestion}
-                  disabled={isAnalyzing}
-              >
-                <ThemedText style={styles.skipButtonText}>Skip Question</ThemedText>
-              </TouchableOpacity>
+                  <View style={styles.progressContainer}>
+                    <View style={styles.progressDotsContainer}>
+                      <TouchableOpacity
+                          style={[ styles.navButton, localQuestionIndex === 0 && styles.disabledButton ]}
+                          onPress={handlePrevious}
+                          disabled={localQuestionIndex === 0 || isAnalyzing}
+                      >
+                        <IconSymbol name="chevron.left" size={24} color={ localQuestionIndex === 0 || isAnalyzing ? 'rgba(255, 255, 255, 0.5)' : '#FFFFFF' } />
+                      </TouchableOpacity>
 
-            </View>
+                      {locationQuestions.map((_, index) => (
+                          <Animated.View
+                              key={index}
+                              style={[ styles.progressDot, { transform: [{ scale: dotStyles[index]?.scale || 1 }], backgroundColor: dotStyles[index]?.color || DOT_COLORS.INACTIVE } ]}
+                          />
+                      ))}
 
-            <View style={styles.progressContainer}>
-              <View style={styles.progressDotsContainer}>
-                <TouchableOpacity
-                    style={[
-                      styles.backButton,
-                      localQuestionIndex === 0 && styles.disabledButton
-                    ]}
-                    onPress={handlePrevious}
-                    disabled={localQuestionIndex === 0 || isAnalyzing}
-                >
-                  <IconSymbol
-                      name="chevron.left"
-                      size={24}
-                      color={
-                        localQuestionIndex === 0
-                            ? 'rgba(255, 255, 255, 0.5)'
-                            : '#FFFFFF'
-                      }
-                  />
-                </TouchableOpacity>
-
-                {locationQuestions.map((_, index) => (
-                    <Animated.View
-                        key={index}
-                        style={[
-                          styles.progressDot,
-                          {
-                            transform: [{ scale: dotStyles[index]?.scale || 1 }],
-                            backgroundColor: dotStyles[index]?.color || DOT_COLORS.INACTIVE
-                          }
-                        ]}
-                    />
-                ))}
-
-                <TouchableOpacity
-                    style={[
-                      styles.backButton,
-                      isAnalyzing && styles.disabledButton
-                    ]}
-                    onPress={handleNext}
-                    disabled={isAnalyzing}
-                >
-                  <IconSymbol
-                      name="chevron.right"
-                      size={24}
-                      color={ isAnalyzing ? 'rgba(255, 255, 255, 0.5)' : '#FFFFFF' }
-                  />
-                </TouchableOpacity>
-              </View>
-            </View>
-
+                      <TouchableOpacity
+                          style={[ styles.navButton, isAnalyzing && styles.disabledButton ]}
+                          onPress={handleNext}
+                          disabled={isAnalyzing}
+                      >
+                        <IconSymbol name="chevron.right" size={24} color={ isAnalyzing ? 'rgba(255, 255, 255, 0.5)' : '#FFFFFF' } />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </>
+            ) : (
+                <View style={styles.noQuestionsContainer}>
+                  <ThemedText style={styles.noQuestionsText}>
+                    No questions available for this location.
+                  </ThemedText>
+                </View>
+            )}
           </Animated.View>
         </View>
       </SafeAreaView>
@@ -616,6 +552,24 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     position: 'relative',
   },
+  skipIconButton: {
+    position: 'absolute',
+    top: 5,
+    right: 15,
+    zIndex: 100,
+    padding: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  infoButton: {
+    position: 'absolute',
+    top: 5,
+    left: 15,
+    zIndex: 100,
+    padding: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   contentContainer: {
     flex: 1,
     width: '100%',
@@ -625,26 +579,31 @@ const styles = StyleSheet.create({
   mainContent: {
     width: '100%',
     alignItems: 'center',
+    justifyContent: 'center', // Adjusted from flex-start potentially
+    paddingTop: 15, // Added padding to push content below header/icons
   },
   header: {
     width: '100%',
-    marginBottom: 10,
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    paddingHorizontal: 10,
+    marginBottom: 10, // Reduced margin below header text
   },
   headerText: {
-    fontSize: 24,
-    fontWeight: '100',
-    textAlign: 'center'
+    fontSize: 22,
+    fontWeight: '300',
+    textAlign: 'center',
+    color: '#333',
   },
   subtextContainer: {
-    marginTop: 2,
-    paddingHorizontal: 10
+    marginTop: 1,
+    paddingHorizontal: 10,
   },
   subtextText: {
-    fontSize: 14,
+    marginTop: 4, // Keep or adjust spacing below main header text
+    fontSize: 12,
     color: '#666',
-    textAlign: 'center'
+    textAlign: 'center',
   },
   imageRowContainer: {
     flexDirection: 'row',
@@ -652,23 +611,27 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: '100%',
     height: IMAGE_AREA_HEIGHT,
-    marginBottom: 16,
+    marginTop: 10, // Reduced margin above images
+    marginBottom: 5, // Reduced margin below images
     gap: 16,
   },
   imagePlaceholder: {
-    width: '70%',
+    flex: 1,
     height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: 'grey',
+    borderColor: '#ccc',
     borderStyle: 'dashed',
+    borderRadius: 8,
+    backgroundColor: '#f9f9f9',
   },
   mainImageContainer: {
     width: '100%',
     height: '100%',
     position: 'relative',
     overflow: 'hidden',
+    borderRadius: 6,
   },
   image: {
     width: '100%',
@@ -677,21 +640,29 @@ const styles = StyleSheet.create({
   },
   smallPlaceholdersContainer: {
     flexDirection: 'column',
-    justifyContent: 'flex-start',
+    justifyContent: 'space-between',
     height: '100%',
     width: 90,
-    gap: 8,
   },
   smallImageContainer: {
     width: 80,
-    height: 80,
-    borderWidth: 2,
-    borderColor: 'grey',
+    height: 70,
+    borderWidth: 1,
+    borderColor: '#ccc',
     borderStyle: 'dashed',
+    borderRadius: 6,
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
     overflow: 'hidden',
+    backgroundColor: '#f9f9f9',
+  },
+  addPlaceholder: {
+    borderColor: '#FF5A00',
+  },
+  emptyPlaceholder: {
+    backgroundColor: '#f0f0f0',
+    borderColor: '#e0e0e0',
   },
   smallImage: {
     width: '100%',
@@ -700,88 +671,74 @@ const styles = StyleSheet.create({
   },
   deleteImageButton: {
     position: 'absolute',
-    top: 5,
-    right: 5,
-    backgroundColor: 'white',
+    top: 4,
+    right: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
     borderRadius: 12,
     width: 24,
     height: 24,
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 1,
   },
   feedbackContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFF5F0',
-    borderWidth: 1,
-    borderColor: '#FF5A00',
-    borderRadius: 8,
-    padding: 12,
+    borderLeftWidth: 4,
+    borderLeftColor: '#FF5A00',
+    borderRadius: 4,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
     paddingRight: 40,
-    marginTop: 16,
+    marginTop: 10,
     width: '100%',
     position: 'relative',
   },
+  feedbackIcon: {
+    marginRight: 8,
+  },
   feedbackText: {
-    color: '#FF5A00',
-    marginLeft: 8,
+    color: '#B74100',
     flex: 1,
+    fontSize: 14,
   },
   closeFeedbackButton: {
     position: 'absolute',
-    top: 5,
-    right: 5,
-    backgroundColor: 'transparent',
-    borderRadius: 12,
-    width: 24,
-    height: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
+    top: 8,
+    right: 8,
+    padding: 4,
     zIndex: 1,
   },
-  skipButton: {
-    backgroundColor: '#E0E0E0',
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 8,
-    marginTop: 10,
-    alignSelf: 'center'
-  },
-  skipButtonText: {
-    color: '#666',
-    fontWeight: '500'
-  },
+  // Old skipButton styles removed
   progressContainer: {
     width: '100%',
     paddingVertical: 10,
+    marginTop: 10,
   },
   progressDotsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8
+    justifyContent: 'space-between',
+    paddingHorizontal: 50,
   },
   progressDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginHorizontal: 3,
   },
-  backButton: {
+  navButton: {
     backgroundColor: '#023866',
-    paddingHorizontal: 10,
-    height: 40,
+    padding: 8,
     borderRadius: 20,
-    alignItems: 'center',
     justifyContent: 'center',
-    minWidth: 40,
+    alignItems: 'center',
   },
   disabledButton: {
-    backgroundColor: 'rgba(2, 56, 102, 0.5)'
+    backgroundColor: 'rgba(2, 56, 102, 0.4)',
+  },
+  disabledButtonText: { // Still needed if you use text on disabled skip button? No, using icon now. Can be removed if not used elsewhere.
+    color: '#999',
   },
   overlayContainer: {
     position: 'absolute',
@@ -789,38 +746,139 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    zIndex: 10,
+    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    zIndex: 50,
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   overlayContent: {
     backgroundColor: 'white',
     borderRadius: 16,
-    padding: 24,
-    width: '80%',
+    padding: 30,
+    width: '85%',
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
   overlayText: {
     fontSize: 18,
-    fontWeight: 'bold',
-    marginTop: 16,
-    marginBottom: 24
+    fontWeight: '600',
+    marginTop: 20,
+    marginBottom: 20,
+    color: '#333',
   },
   progressBarContainer: {
     width: '100%',
-    height: 10,
+    height: 12,
     backgroundColor: '#E0E0E0',
-    borderRadius: 5,
-    overflow: 'hidden'
+    borderRadius: 6,
+    overflow: 'hidden',
   },
   progressBar: {
     height: '100%',
-    backgroundColor: '#FF5A00'
+    backgroundColor: '#FF5A00',
+    borderRadius: 6,
   },
   progressText: {
-    marginTop: 8,
-    fontSize: 14
+    marginTop: 12,
+    fontSize: 16,
+    color: '#555',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContentContainer: {
+    width: '100%',
+    maxHeight: '90%',
+    backgroundColor: 'white',
+    borderRadius: 12,
+    paddingTop: 5,
+    paddingBottom: 25,
+    paddingHorizontal: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalScrollView: {
+    paddingBottom: 10,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#023866',
+    flex: 1,
+    marginRight: 10,
+  },
+  modalCloseButtonIcon: {
+    padding: 5,
+  },
+  modalTextIntro: {
+    fontSize: 15,
+    lineHeight: 22,
+    color: '#333',
+    marginBottom: 15,
+  },
+  modalText: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: '#444',
+    flex: 1,
+  },
+  tipItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+    paddingLeft: 5,
+  },
+  tipIcon: {
+    marginRight: 10,
+    marginTop: 3,
+  },
+  boldText: {
+    fontWeight: '600',
+  },
+  modalCloseButton: {
+    marginTop: 25,
+    backgroundColor: '#023866',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignSelf: 'center',
+  },
+  modalCloseButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+  noQuestionsContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  noQuestionsText: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
   },
 });
