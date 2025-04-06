@@ -52,7 +52,8 @@ export default function CaptureScreen() {
     updateQuestionImages,
     userName,
     surveyDate,
-    surveyDescription
+    surveyDescription,
+    surveyDateTime
   } = useSurvey();
 
   const locationQuestions = questions.filter(
@@ -328,6 +329,7 @@ export default function CaptureScreen() {
         id: reportId,
         scope: 'Building Inspection',
         date: surveyDate,
+        dateTime: surveyDateTime,
         status: 'completed',
         userName,
         description: surveyDescription,

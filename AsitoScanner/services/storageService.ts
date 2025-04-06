@@ -4,6 +4,7 @@ export interface Report {
   id: string;
   scope: string;
   date: string;
+  dateTime?: string;
   status: string;
   userName: string;
   description: string;

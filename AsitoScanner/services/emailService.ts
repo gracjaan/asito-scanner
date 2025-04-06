@@ -15,6 +15,18 @@ const formatReportHtml = (report: Report): string => {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
+  // Format the datetime
+  const formatDateTime = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleString('en-US', { 
+      month: 'short', 
+      day: 'numeric', 
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
   // Generate HTML for each question
   const questionsHtml = report.questions
     .filter(q => q.completed)
@@ -56,7 +68,7 @@ const formatReportHtml = (report: Report): string => {
         </div>
         
         <div class="info-row">
-          <span class="label">Date:</span> ${formatDate(report.date)}
+          <span class="label">Date:</span> ${report.dateTime ? formatDateTime(report.dateTime) : formatDate(report.date)}
         </div>
         
         <div class="info-row">

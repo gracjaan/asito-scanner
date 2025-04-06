@@ -104,7 +104,7 @@ export default function ReportsScreen() {
                                 <View style={styles.dateContainer}>
                                     <IconSymbol name="calendar" size={16} color="#666" />
                                     <ThemedText style={styles.dateText}>
-                                        {item.date}
+                                        {item.dateTime || item.date}
                                     </ThemedText>
                                 </View>
                                 

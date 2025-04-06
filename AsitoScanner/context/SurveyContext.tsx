@@ -17,6 +17,7 @@ type SurveyContextType = {
   currentQuestionIndex: number;
   userName: string;
   surveyDate: string;
+  surveyDateTime: string;
   surveyStatus: string;
   surveyDescription: string;
 
@@ -27,6 +28,7 @@ type SurveyContextType = {
   markQuestionAsCompleted: (questionId: string) => void;
   setUserName: (name: string) => void;
   setSurveyDate: (date: string) => void;
+  setSurveyDateTime: (dateTime: string) => void;
   setSurveyStatus: (status: string) => void;
   setSurveyDescription: (description: string) => void;
   removeImageFromQuestion: (questionId: string, imageIndex: number) => void;
@@ -38,6 +40,7 @@ const SurveyContext = createContext<SurveyContextType>({
   currentQuestionIndex: 0,
   userName: 'Gracjan Chmielnicki',
   surveyDate: new Date().toLocaleDateString(),
+  surveyDateTime: new Date().toLocaleString(),
   surveyStatus: 'in progress',
   surveyDescription: '',
 
@@ -48,6 +51,7 @@ const SurveyContext = createContext<SurveyContextType>({
   markQuestionAsCompleted: () => {},
   setUserName: () => {},
   setSurveyDate: () => {},
+  setSurveyDateTime: () => {},
   setSurveyStatus: () => {},
   setSurveyDescription: () => {},
   removeImageFromQuestion: () => {},
@@ -413,6 +417,7 @@ export const SurveyProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [userName, setUserName] = useState('Gracjan Chmielnicki');
   const [surveyDate, setSurveyDate] = useState(new Date().toLocaleDateString());
+  const [surveyDateTime, setSurveyDateTime] = useState(new Date().toLocaleString());
   const [surveyStatus, setSurveyStatus] = useState('in progress');
   const [surveyDescription, setSurveyDescription] = useState(
       'Inspection of the building facilities and safety measures.'
@@ -483,6 +488,7 @@ export const SurveyProvider: React.FC<{ children: ReactNode }> = ({ children }) 
             currentQuestionIndex,
             userName,
             surveyDate,
+            surveyDateTime,
             surveyStatus,
             surveyDescription,
             setQuestions,
@@ -492,6 +498,7 @@ export const SurveyProvider: React.FC<{ children: ReactNode }> = ({ children }) 
             markQuestionAsCompleted,
             setUserName,
             setSurveyDate,
+            setSurveyDateTime,
             setSurveyStatus,
             setSurveyDescription,
             removeImageFromQuestion,

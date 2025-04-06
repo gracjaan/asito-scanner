@@ -12,6 +12,7 @@ export default function FinalReport() {
         questions,
         userName,
         surveyDate,
+        surveyDateTime,
         surveyStatus,
         surveyDescription
     } = useSurvey();
@@ -31,6 +32,7 @@ export default function FinalReport() {
                 id: new Date().getTime().toString(),
                 scope: "Nationale Nederlandse",
                 date: surveyDate,
+                dateTime: surveyDateTime,
                 status: surveyStatus,
                 userName: userName,
                 description: surveyDescription,
@@ -91,7 +93,7 @@ export default function FinalReport() {
 
                     <View style={styles.infoRow}>
                         <IconSymbol name="calendar" size={20} color="#000" />
-                        <Text style={styles.infoText}>{surveyDate}</Text>
+                        <Text style={styles.infoText}>{surveyDateTime}</Text>
                     </View>
 
                     <View style={styles.infoRow}>

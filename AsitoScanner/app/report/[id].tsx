@@ -120,7 +120,7 @@ export default function ReportDetail() {
 
                     <View style={styles.infoRow}>
                         <IconSymbol name="calendar" size={20} color="#000" />
-                        <Text style={styles.infoText}>{report.date}</Text>
+                        <Text style={styles.infoText}>{report.dateTime || report.date}</Text>
                     </View>
 
                     <View style={styles.infoRow}>
