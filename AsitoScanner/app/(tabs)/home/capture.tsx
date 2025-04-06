@@ -114,17 +114,19 @@ export default function CaptureScreen() {
 
   useEffect(() => {
     setLocalQuestionIndex(0);
+  }, [locationFilterValue]);
+
+  useEffect(() => {
     const newLocationQuestions = questions.filter(
-        q => q.location?.toLowerCase() === locationFilterValue.toLowerCase()
+        q => q.location?.toLowerCase() === locationFilterValue.toLowerCase(),
     );
     const initialDotStyles = Array(newLocationQuestions.length)
         .fill(0)
         .map((_, i) => ({
           scale: i === 0 ? 1.3 : 1,
-          color: i === 0 ? DOT_COLORS.ACTIVE : DOT_COLORS.INACTIVE
+          color: i === 0 ? DOT_COLORS.ACTIVE : DOT_COLORS.INACTIVE,
         }));
     setDotStyles(initialDotStyles);
-
   }, [locationFilterValue, questions]);
 
   const [isAnalyzing, setIsAnalyzing] = useState(false);
