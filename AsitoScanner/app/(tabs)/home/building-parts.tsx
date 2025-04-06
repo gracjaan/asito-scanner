@@ -6,9 +6,6 @@ import { router } from 'expo-router';
 
 const reports = [
     {
-        scope: 'Exterior',
-    },
-    {
         scope: 'Entrance',
     },
     {

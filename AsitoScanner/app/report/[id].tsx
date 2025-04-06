@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, Image, ActivityIndicator, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Image, ActivityIndicator, TouchableOpacity, SafeAreaView } from "react-native";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
@@ -87,6 +87,35 @@ export default function ReportDetail() {
             </View>
         );
     };
+    
+    const renderManualQuestions = () => {
+        if (!report || !report.manualQuestions || report.manualQuestions.length === 0) return null;
+
+        const manualQuestions = report.manualQuestions || [];
+        
+        return (
+            <View style={styles.manualQuestionsSection}>
+                <Text style={styles.manualQuestionsTitle}>Additional Observations</Text>
+                
+                <View style={styles.manualQuestionsContainer}>
+                    {manualQuestions.map((question, index) => (
+                        <View key={question.id} style={styles.manualQuestionItem}>
+                            <Text style={styles.manualQuestionText}>
+                                {question.question}
+                            </Text>
+                            <Text style={styles.manualAnswerText}>
+                                {question.answer || "No answer provided"}
+                            </Text>
+                            
+                            {index < manualQuestions.length - 1 && (
+                                <View style={styles.questionDivider} />
+                            )}
+                        </View>
+                    ))}
+                </View>
+            </View>
+        );
+    };
 
     if (loading) {
         return (
@@ -109,7 +138,7 @@ export default function ReportDetail() {
     const completedQuestions = report.questions.filter(q => q.completed);
 
     return (
-        <View style={styles.mainContainer}>
+        <SafeAreaView style={styles.mainContainer}>
             <ScrollView style={styles.container}>
                 <Text style={styles.title}>Nationale Nederlandse</Text>
                 <View style={styles.infoSection}>
@@ -171,6 +200,8 @@ export default function ReportDetail() {
                     </View>
                 )}
                 
+                {renderManualQuestions()}
+                
                 {/* Add some padding at the bottom for the button */}
                 <View style={{ height: 80 }} />
             </ScrollView>
@@ -189,7 +220,7 @@ export default function ReportDetail() {
             >
                 <IconSymbol name="envelope" size={24} color="#FFFFFF" />
             </TouchableOpacity>
-        </View>
+        </SafeAreaView>
     );
 }
 
@@ -346,5 +377,36 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.3,
         shadowRadius: 4,
         elevation: 5,
+    },
+    manualQuestionsSection: {
+        marginTop: 20,
+        paddingHorizontal: 20,
+    },
+    manualQuestionsTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#023866',
+        marginBottom: 15,
+    },
+    manualQuestionsContainer: {
+        backgroundColor: '#f9f9f9',
+        borderRadius: 8,
+        padding: 15,
+        borderWidth: 1,
+        borderColor: '#e0e0e0',
+    },
+    manualQuestionItem: {
+        marginBottom: 15,
+    },
+    manualQuestionText: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#333',
+        marginBottom: 6,
+    },
+    manualAnswerText: {
+        fontSize: 15,
+        color: '#444',
+        marginLeft: 10,
     },
 }); 

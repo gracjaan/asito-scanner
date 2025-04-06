@@ -22,7 +22,9 @@ import { ThemedText } from '@/components/ThemedText';
 import { useSurvey } from '@/context/SurveyContext';
 import { sendImagesToOpenAIWithBase64 } from '@/services/openaiService';
 import { SubmitModal } from '@/components/SubmitModal';
+import { ManualQuestionsModal } from '@/components/ManualQuestionsModal';
 import { saveReport } from '@/services/storageService';
+import { ManualQuestion } from '@/context/SurveyContext';
 
 const { width, height } = Dimensions.get('window');
 
@@ -33,6 +35,49 @@ const DOT_COLORS = {
 };
 
 const IMAGE_AREA_HEIGHT = height * 0.35;
+
+// Building parts order - update to match the context source exactly
+const BUILDING_PARTS = [
+  'Entrance',
+  'Break/Chill-Out Area',
+  'Corridor/Hall Area',
+  'Food&Drink',
+  'Workplaces',
+  'Toilet Area'
+];
+
+// Define location types
+type LocationType = 'Entrance' | 'Break/Chill-Out Area' | 'Corridor/Hall Area' | 'Food&Drink' | 'Workplaces' | 'Toilet Area';
+type BuildingPartType = 'Entrance' | 'Break/Chill-Out Area' | 'Corridor' | 'Food&Drink Area' | 'Workplaces' | 'Toilets';
+
+// Define a function to normalize location values
+const normalizeBuildingPart = (location: string): string => {
+  const mappings: Record<string, string> = {
+    'Entrance': 'Entrance',
+    'Break/Chill-Out Area': 'Break/Chill-Out Area', 
+    'Corridor/Hall Area': 'Corridor',
+    'Corridor': 'Corridor',
+    'Food&Drink': 'Food&Drink Area',
+    'Food&Drink Area': 'Food&Drink Area',
+    'Workplaces': 'Workplaces',
+    'Toilet Area': 'Toilets',
+    'Toilets': 'Toilets'
+  };
+  
+  // Log the mapping process
+  console.log(`Normalizing location: "${location}" → "${mappings[location] || location}"`);
+  return mappings[location] || location;
+};
+
+// Mapping from location name (in questions) to building part name (in manual questions)
+const LOCATION_TO_BUILDING_PART: Record<LocationType, BuildingPartType> = {
+  'Entrance': 'Entrance',
+  'Break/Chill-Out Area': 'Break/Chill-Out Area',
+  'Corridor/Hall Area': 'Corridor',
+  'Food&Drink': 'Food&Drink Area',
+  'Workplaces': 'Workplaces',
+  'Toilet Area': 'Toilets',
+};
 
 export default function CaptureScreen() {
   const { location } = useLocalSearchParams();
@@ -53,7 +98,9 @@ export default function CaptureScreen() {
     userName,
     surveyDate,
     surveyDescription,
-    surveyDateTime
+    surveyDateTime,
+    setManualQuestions,
+    manualQuestions
   } = useSurvey();
 
   const locationQuestions = questions.filter(
@@ -61,6 +108,9 @@ export default function CaptureScreen() {
   );
 
   const [localQuestionIndex, setLocalQuestionIndex] = useState(0);
+  const [completedParts, setCompletedParts] = useState<string[]>([]);
+  const [currentManualQuestions, setCurrentManualQuestions] = useState<ManualQuestion[]>([]);
+  const [allManualQuestions, setAllManualQuestions] = useState<ManualQuestion[]>([]);
 
   useEffect(() => {
     setLocalQuestionIndex(0);
@@ -79,6 +129,7 @@ export default function CaptureScreen() {
 
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
+  const [showManualQuestionsModal, setShowManualQuestionsModal] = useState(false);
   const [analysisProgress, setAnalysisProgress] = useState(0);
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
   const [isInfoModalVisible, setIsInfoModalVisible] = useState(false);
@@ -103,6 +154,20 @@ export default function CaptureScreen() {
           }))
   );
 
+  // Function to get next building part
+  const getNextBuildingPart = () => {
+    const currentIndex = BUILDING_PARTS.indexOf(locationFilterValue);
+    console.log(`Current location: "${locationFilterValue}", index in BUILDING_PARTS: ${currentIndex}`);
+    console.log(`All building parts: ${JSON.stringify(BUILDING_PARTS)}`);
+    
+    if (currentIndex < BUILDING_PARTS.length - 1) {
+      const nextPart = BUILDING_PARTS[currentIndex + 1];
+      console.log(`Next building part will be: ${nextPart}`);
+      return nextPart;
+    }
+    console.log("No next building part found - this is the last one");
+    return null;
+  };
 
   useEffect(() => {
     if (locationQuestions.length === 0) return;
@@ -157,7 +222,7 @@ export default function CaptureScreen() {
 
   const skipQuestion = () => {
     if (localQuestionIndex === locationQuestions.length - 1) {
-      setShowSubmitModal(true);
+      showManualQuestionsForCurrentPart();
     } else {
       navigateToQuestion(localQuestionIndex + 1);
     }
@@ -238,6 +303,22 @@ export default function CaptureScreen() {
     updateQuestionImages(currentQuestionId, updatedImages);
   };
 
+  const showManualQuestionsForCurrentPart = () => {
+    // Map the locationFilterValue to the corresponding buildingPart name used in manual questions
+    const buildingPartForManualQuestions = normalizeBuildingPart(locationFilterValue);
+    
+    console.log(`Current location filter value: "${locationFilterValue}"`);
+    console.log(`Mapped to building part: "${buildingPartForManualQuestions}"`);
+    
+    // Filter manual questions just for current building part
+    const partQuestions = manualQuestions.filter(q => 
+      q.buildingPart === buildingPartForManualQuestions
+    );
+    
+    setCurrentManualQuestions(partQuestions);
+    setShowManualQuestionsModal(true);
+  };
+
   const handleNext = async () => {
     if (isAnalyzing) return;
     if (currentImages.length === 0) {
@@ -259,7 +340,7 @@ export default function CaptureScreen() {
           markQuestionAsCompleted(currentQuestionId);
           setFeedbackMessage(null);
           if (localQuestionIndex === locationQuestions.length - 1) {
-            setShowSubmitModal(true);
+            showManualQuestionsForCurrentPart();
           } else {
             navigateToQuestion(localQuestionIndex + 1);
           }
@@ -304,26 +385,71 @@ export default function CaptureScreen() {
     });
   };
 
-  const handleSubmit = async () => {
-    setShowSubmitModal(false);
+  const moveToNextBuildingPart = () => {
+    const nextPart = getNextBuildingPart();
+    console.log(`moveToNextBuildingPart - Current: ${locationFilterValue}, Next: ${nextPart}`);
+    
+    if (nextPart) {
+      // Add current part to completed parts
+      setCompletedParts([...completedParts, locationFilterValue]);
+      
+      // Navigate to next building part
+      console.log(`Navigating to next part: ${nextPart}`);
+      router.push(`/home/capture?location=${encodeURIComponent(nextPart)}`);
+    } else {
+      // All parts are completed, generate final report
+      console.log("All parts completed, generating final report");
+      generateFinalReport();
+    }
+  };
+
+  const handleManualQuestionsSubmit = (answers: ManualQuestion[]) => {
+    setShowManualQuestionsModal(false);
+    
+    // Add answers to allManualQuestions
+    const updatedAllQuestions = [...allManualQuestions];
+    
+    // Get the correct building part name for storage
+    const buildingPartForManualQuestions = normalizeBuildingPart(locationFilterValue);
+    
+    // Remove any existing questions for this building part
+    const filteredQuestions = updatedAllQuestions.filter(q => 
+      q.buildingPart !== buildingPartForManualQuestions
+    );
+    
+    // Add the new answers
+    const combinedQuestions = [...filteredQuestions, ...answers];
+    
+    setAllManualQuestions(combinedQuestions);
+    setManualQuestions(combinedQuestions);
+    
+    // Move to next building part or generate final report
+    moveToNextBuildingPart();
+  };
+
+  const handleManualQuestionsCancel = () => {
+    // Return to current questions without saving
+    setShowManualQuestionsModal(false);
+  };
+
+  const generateFinalReport = async () => {
     try {
       const reportId = `report-${Date.now()}`;
-      const questionsForReport = questions
-          .filter(q => q.location?.toLowerCase() === locationFilterValue.toLowerCase())
-          .map(q => ({
-            id: q.id,
-            text: q.text,
-            displayText: q.displayText || q.text,
-            subtext: q.subtext || "",
-            analyticalQuestion: q.analyticalQuestion || q.text,
-            answer: q.answer || '',
-            images: q.images || [],
-            completed: q.completed || false
-          }));
-
-      if (questionsForReport.length === 0) {
-        console.warn("Attempting to save report for a location with no questions:", locationFilterValue);
-      }
+      
+      // Include all questions from all building parts
+      const allCompletedQuestions = questions
+        .filter(q => q.completed)
+        .map(q => ({
+          id: q.id,
+          text: q.text,
+          displayText: q.displayText || q.text,
+          subtext: q.subtext || "",
+          analyticalQuestion: q.analyticalQuestion || q.text,
+          answer: q.answer || '',
+          images: q.images || [],
+          completed: q.completed || false,
+          location: q.location || ''
+        }));
 
       await saveReport({
         id: reportId,
@@ -333,10 +459,11 @@ export default function CaptureScreen() {
         status: 'completed',
         userName,
         description: surveyDescription,
-        questions: questionsForReport
+        questions: allCompletedQuestions,
+        manualQuestions: allManualQuestions
       });
 
-      console.log('Survey for location saved successfully');
+      console.log('Complete building survey saved successfully');
       router.push('/home/final-report');
     } catch (error) {
       console.error('Error saving survey:', error);
@@ -425,7 +552,7 @@ export default function CaptureScreen() {
 
 
   return (
-      <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+      <SafeAreaView style={styles.safeArea} edges={['bottom']}>
         <View style={styles.container}>
 
           {/* Skip Icon Button */}
@@ -446,7 +573,20 @@ export default function CaptureScreen() {
             <IconSymbol name="info.circle" size={28} color={isAnalyzing ? '#ccc' : '#023866'} />
           </TouchableOpacity>
 
-          <SubmitModal visible={showSubmitModal} onCancel={() => setShowSubmitModal(false)} onSubmit={handleSubmit} />
+          <SubmitModal 
+            visible={showSubmitModal} 
+            onCancel={() => setShowSubmitModal(false)} 
+            onSubmit={() => showManualQuestionsForCurrentPart()}
+            onContinueToManualQuestions={() => showManualQuestionsForCurrentPart()} 
+          />
+          
+          <ManualQuestionsModal
+            visible={showManualQuestionsModal}
+            onCancel={handleManualQuestionsCancel}
+            onSubmit={handleManualQuestionsSubmit}
+            buildingPart={locationFilterValue}
+          />
+          
           {renderInfoModal()}
           {renderAnalysisOverlay()}
 
@@ -455,6 +595,12 @@ export default function CaptureScreen() {
           >
             {locationQuestions.length > 0 ? (
                 <>
+                  <View style={styles.buildingPartHeader}>
+                    <ThemedText style={styles.buildingPartTitle}>
+                      {locationFilterValue}
+                    </ThemedText>
+                  </View>
+                  
                   <View style={styles.mainContent}>
                     <View style={styles.header}>
                       <ThemedText style={styles.headerText}>{currentDisplayText}</ThemedText>
@@ -498,9 +644,6 @@ export default function CaptureScreen() {
                           </TouchableOpacity>
                         </View>
                     )}
-
-                    {/* Old Skip Button removed from here */}
-
                   </View>
 
                   <View style={styles.progressContainer}>
@@ -556,8 +699,8 @@ const styles = StyleSheet.create({
   },
   skipIconButton: {
     position: 'absolute',
-    top: 5,
-    right: 15,
+    top: 16,
+    right: 16,
     zIndex: 100,
     padding: 6,
     justifyContent: 'center',
@@ -565,8 +708,8 @@ const styles = StyleSheet.create({
   },
   infoButton: {
     position: 'absolute',
-    top: 5,
-    left: 15,
+    top: 16,
+    left: 16,
     zIndex: 100,
     padding: 6,
     justifyContent: 'center',
@@ -711,7 +854,6 @@ const styles = StyleSheet.create({
     padding: 4,
     zIndex: 1,
   },
-  // Old skipButton styles removed
   progressContainer: {
     width: '100%',
     paddingVertical: 10,
@@ -882,5 +1024,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666',
     textAlign: 'center',
+  },
+  buildingPartHeader: {
+    width: '100%',
+    paddingVertical: 8,
+    marginBottom: 10,
+    alignItems: 'center',
+    // borderBottomWidth: 1,
+    // borderBottomColor: '#FF5A00',
+  },
+  buildingPartTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#023866',
   },
 });

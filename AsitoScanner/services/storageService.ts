@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ManualQuestion } from '@/context/SurveyContext';
 
 export interface Report {
   id: string;
@@ -17,6 +18,7 @@ export interface Report {
     images: string[];
     completed: boolean;
   }[];
+  manualQuestions?: ManualQuestion[];
 }
 
 const STORAGE_KEY = 'asito_reports';

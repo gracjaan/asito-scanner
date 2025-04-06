@@ -12,8 +12,18 @@ export type SurveyQuestion = {
   completed: boolean;
 };
 
+export type ManualQuestion = {
+  id: string;
+  question: string;
+  answer: string;
+  buildingPart?: string;
+  options?: string[];
+  required?: boolean;
+};
+
 type SurveyContextType = {
   questions: SurveyQuestion[];
+  manualQuestions: ManualQuestion[];
   currentQuestionIndex: number;
   userName: string;
   surveyDate: string;
@@ -33,10 +43,12 @@ type SurveyContextType = {
   setSurveyDescription: (description: string) => void;
   removeImageFromQuestion: (questionId: string, imageIndex: number) => void;
   updateQuestionImages: (questionId: string, newImages: string[]) => void;
+  setManualQuestions: (questions: ManualQuestion[]) => void;
 };
 
 const SurveyContext = createContext<SurveyContextType>({
   questions: [],
+  manualQuestions: [],
   currentQuestionIndex: 0,
   userName: 'Gracjan Chmielnicki',
   surveyDate: new Date().toLocaleDateString(),
@@ -56,6 +68,7 @@ const SurveyContext = createContext<SurveyContextType>({
   setSurveyDescription: () => {},
   removeImageFromQuestion: () => {},
   updateQuestionImages: () => {},
+  setManualQuestions: () => {},
 });
 
 // Define a type for location prompts
@@ -414,6 +427,7 @@ const sampleQuestions: SurveyQuestion[] = sampleLocationPrompts.reduce((acc: Sur
 
 export const SurveyProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [questions, setQuestions] = useState<SurveyQuestion[]>(sampleQuestions);
+  const [manualQuestions, setManualQuestions] = useState<ManualQuestion[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [userName, setUserName] = useState('Gracjan Chmielnicki');
   const [surveyDate, setSurveyDate] = useState(new Date().toLocaleDateString());
@@ -485,6 +499,7 @@ export const SurveyProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       <SurveyContext.Provider
           value={{
             questions,
+            manualQuestions,
             currentQuestionIndex,
             userName,
             surveyDate,
@@ -494,6 +509,7 @@ export const SurveyProvider: React.FC<{ children: ReactNode }> = ({ children }) 
             setQuestions,
             setCurrentQuestionIndex,
             addImageToQuestion,
+            removeImageFromQuestion,
             setAnswerForQuestion,
             markQuestionAsCompleted,
             setUserName,
@@ -501,8 +517,8 @@ export const SurveyProvider: React.FC<{ children: ReactNode }> = ({ children }) 
             setSurveyDateTime,
             setSurveyStatus,
             setSurveyDescription,
-            removeImageFromQuestion,
             updateQuestionImages,
+            setManualQuestions,
           }}
       >
         {children}

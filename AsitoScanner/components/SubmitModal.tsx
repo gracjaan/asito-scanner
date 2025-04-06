@@ -5,9 +5,10 @@ interface SubmitModalProps {
   visible: boolean;
   onCancel: () => void;
   onSubmit: () => void;
+  onContinueToManualQuestions: () => void;
 }
 
-export function SubmitModal({ visible, onCancel, onSubmit }: SubmitModalProps) {
+export function SubmitModal({ visible, onCancel, onSubmit, onContinueToManualQuestions }: SubmitModalProps) {
   return (
     <Modal
       animationType="fade"
@@ -17,9 +18,10 @@ export function SubmitModal({ visible, onCancel, onSubmit }: SubmitModalProps) {
     >
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
-          <ThemedText style={styles.modalTitle}>Submit Survey</ThemedText>
+          <ThemedText style={styles.modalTitle}>Section Complete</ThemedText>
           <ThemedText style={styles.modalText}>
-            You have completed all questions. Would you like to submit your survey?
+            You have completed all questions for this section. 
+            Before submitting, you need to complete the additional manual questions in the next section.
           </ThemedText>
           
           <View style={styles.modalButtons}>
@@ -31,10 +33,10 @@ export function SubmitModal({ visible, onCancel, onSubmit }: SubmitModalProps) {
             </TouchableOpacity>
             
             <TouchableOpacity 
-              style={[styles.modalButton, styles.submitButton]} 
-              onPress={onSubmit}
+              style={[styles.modalButton, styles.continueButton]} 
+              onPress={onContinueToManualQuestions}
             >
-              <ThemedText style={styles.submitButtonText}>Submit</ThemedText>
+              <ThemedText style={styles.continueButtonText}>Next Section</ThemedText>
             </TouchableOpacity>
           </View>
         </View>
@@ -55,7 +57,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 12,
     padding: 24,
-    width: '90%',
+    width: '80%',
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -68,29 +70,40 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 16,
     textAlign: 'center',
+    color: '#023866',
   },
   modalText: {
     fontSize: 16,
     marginBottom: 24,
     textAlign: 'center',
+    lineHeight: 22,
+    color: '#333',
   },
   modalButtons: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'space-around',
     width: '100%',
   },
   modalButton: {
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 8,
-    minWidth: '45%',
+    minWidth: '40%',
     alignItems: 'center',
   },
   cancelButton: {
     backgroundColor: '#E0E0E0',
+    marginRight: 10,
   },
   cancelButtonText: {
     color: '#333',
+    fontWeight: 'bold',
+  },
+  continueButton: {
+    backgroundColor: '#FF5A00',
+  },
+  continueButtonText: {
+    color: 'white',
     fontWeight: 'bold',
   },
   submitButton: {
