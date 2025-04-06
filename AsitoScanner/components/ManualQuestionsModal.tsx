@@ -535,14 +535,14 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    // padding: 20,
   },
   modalContent: {
     backgroundColor: 'white',
     borderRadius: 12,
     padding: 24,
     width: '90%',
-    maxHeight: '90%',
+    maxHeight: '70%',
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -565,10 +565,10 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     width: '100%',
-    maxHeight: '70%',
+    // maxHeight: '70%',
   },
   questionContainer: {
-    marginBottom: 16,
+    // marginBottom: 16,
     width: '100%',
   },
   questionText: {
@@ -624,7 +624,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '100%',
-    // marginTop: 16,
+    marginTop: 16,
   },
   modalButton: {
     paddingVertical: 12,
