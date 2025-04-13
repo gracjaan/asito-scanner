@@ -539,11 +539,46 @@ export default function CaptureScreen() {
               </View>
               <LocalizedText style={styles.modalTextIntro} textKey="photoTipsIntro" fallback="To help the AI analyze the images effectively, please follow these tips:">
               </LocalizedText>
-              <View style={styles.tipItem}><IconSymbol name="lightbulb.fill" size={18} color="#FF5A00" style={styles.tipIcon}/><LocalizedText style={styles.modalText}><ThemedText style={styles.boldText}>Good Lighting:</ThemedText> <LocalizedText textKey="photoTipLighting" fallback="Ensure the area is well-lit. Avoid shadows or direct glare if possible." useThemedText={false} /></LocalizedText></View>
-              <View style={styles.tipItem}><IconSymbol name="camera.metering.center.weighted" size={18} color="#FF5A00" style={styles.tipIcon}/><LocalizedText style={styles.modalText}><ThemedText style={styles.boldText}>Focus:</ThemedText> <LocalizedText textKey="photoTipFocus" fallback="Make sure the subject of the photo is clear and in focus. Tap the screen to focus if needed." useThemedText={false} /></LocalizedText></View>
-              <View style={styles.tipItem}><IconSymbol name="arrow.up.left.and.down.right.magnifyingglass" size={18} color="#FF5A00" style={styles.tipIcon}/><LocalizedText style={styles.modalText}><ThemedText style={styles.boldText}>Framing:</ThemedText> <LocalizedText textKey="photoTipFraming" fallback="Capture the entire relevant item or area mentioned in the question. Don't cut off important parts." useThemedText={false} /></LocalizedText></View>
-              <View style={styles.tipItem}><IconSymbol name="rectangle.stack" size={18} color="#FF5A00" style={styles.tipIcon}/><LocalizedText style={styles.modalText}><ThemedText style={styles.boldText}>Multiple Angles (if needed):</ThemedText> <LocalizedText textKey="photoTipAngles" fallback="Sometimes, photos from different angles help provide more context. Use the small image slots." useThemedText={false} /></LocalizedText></View>
-              <View style={styles.tipItem}><IconSymbol name="photo.on.rectangle" size={18} color="#FF5A00" style={styles.tipIcon}/><LocalizedText style={styles.modalText}><ThemedText style={styles.boldText}>Main Image:</ThemedText> <LocalizedText textKey="photoTipMainImage" fallback="Use the large placeholder for the primary, most representative photo." useThemedText={false} /></LocalizedText></View>
+              <View style={styles.tipItem}>
+                <IconSymbol name="lightbulb.fill" size={18} color="#FF5A00" style={styles.tipIcon}/>
+                <LocalizedText style={styles.modalText}>
+                  <LocalizedText textKey="photoTipLightingLabel" style={styles.boldText} useThemedText={false} />
+                  {' '}
+                  <LocalizedText textKey="photoTipLighting" useThemedText={false} />
+                </LocalizedText>
+              </View>
+              <View style={styles.tipItem}>
+                <IconSymbol name="camera.metering.center.weighted" size={18} color="#FF5A00" style={styles.tipIcon}/>
+                <LocalizedText style={styles.modalText}>
+                  <LocalizedText textKey="photoTipFocusLabel" style={styles.boldText} useThemedText={false} />
+                  {' '}
+                  <LocalizedText textKey="photoTipFocus" useThemedText={false} />
+                </LocalizedText>
+              </View>
+              <View style={styles.tipItem}>
+                <IconSymbol name="arrow.up.left.and.down.right.magnifyingglass" size={18} color="#FF5A00" style={styles.tipIcon}/>
+                <LocalizedText style={styles.modalText}>
+                  <LocalizedText textKey="photoTipFramingLabel" style={styles.boldText} useThemedText={false} />
+                  {' '}
+                  <LocalizedText textKey="photoTipFraming" useThemedText={false} />
+                </LocalizedText>
+              </View>
+              <View style={styles.tipItem}>
+                <IconSymbol name="rectangle.stack" size={18} color="#FF5A00" style={styles.tipIcon}/>
+                <LocalizedText style={styles.modalText}>
+                  <LocalizedText textKey="photoTipAnglesLabel" style={styles.boldText} useThemedText={false} />
+                  {' '}
+                  <LocalizedText textKey="photoTipAngles" useThemedText={false} />
+                </LocalizedText>
+              </View>
+              <View style={styles.tipItem}>
+                <IconSymbol name="photo.on.rectangle" size={18} color="#FF5A00" style={styles.tipIcon}/>
+                <LocalizedText style={styles.modalText}>
+                  <LocalizedText textKey="photoTipMainImageLabel" style={styles.boldText} useThemedText={false} />
+                  {' '}
+                  <LocalizedText textKey="photoTipMainImage" useThemedText={false} />
+                </LocalizedText>
+              </View>
               <TouchableOpacity style={styles.modalCloseButton} onPress={() => setIsInfoModalVisible(false)}>
                 <LocalizedText style={styles.modalCloseButtonText} textKey="gotIt" fallback="Got it!" />
               </TouchableOpacity>
