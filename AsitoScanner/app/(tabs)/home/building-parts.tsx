@@ -1,40 +1,54 @@
 import { StyleSheet, FlatList, View, TouchableOpacity } from 'react-native';
-
-import { ThemedText } from '@/components/ThemedText';
-import { IconSymbol } from '@/components/ui/IconSymbol';
 import { router } from 'expo-router';
+import { LocalizedText } from '@/components/LocalizedText';
+import { IconSymbol } from '@/components/ui/IconSymbol';
+import { useLanguage } from '@/context/LanguageContext';
+import { translations } from '@/constants/Translations';
 
-const reports = [
+type BuildingPart = {
+    scope: string;
+    translationKey: keyof typeof translations.en;
+};
+
+const getBuildingParts = (): BuildingPart[] => [
     {
         scope: 'Entrance',
+        translationKey: 'entrance',
     },
     {
         scope: 'Break/Chill-Out Area',
+        translationKey: 'breakArea',
     },
     {
         scope: 'Food&Drink',
+        translationKey: 'foodDrink',
     },
     {
         scope: 'Corridor/Hall Area',
+        translationKey: 'corridor',
     },
     {
         scope: 'Workplaces',
+        translationKey: 'workplaces',
     },
     {
         scope: 'Toilet Area',
+        translationKey: 'toiletArea',
     },
 ];
 
 export default function BuildingPartsScreen() {
+    const { t } = useLanguage();
+    const buildingParts = getBuildingParts();
+    
     return (
         <View style={styles.container}>
             <FlatList
                 style={styles.list}
-                data={reports}
+                data={buildingParts}
                 keyExtractor={(item) => item.scope}
                 contentContainerStyle={styles.listContent}
                 renderItem={({ item }) => (
-                    // building-parts.tsx
                     <TouchableOpacity
                         style={styles.reportContainer}
                         onPress={() =>
@@ -44,10 +58,9 @@ export default function BuildingPartsScreen() {
                             })
                         }
                     >
-                        <ThemedText>{item.scope}</ThemedText>
+                        <LocalizedText textKey={item.translationKey} />
                         <IconSymbol name="chevron.right" size={24} color="#023866" />
                     </TouchableOpacity>
-
                 )}
             />
         </View>

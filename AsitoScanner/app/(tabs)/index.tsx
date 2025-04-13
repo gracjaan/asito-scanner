@@ -4,6 +4,11 @@ import { IconSymbol } from '@/components/ui/IconSymbol';
 import { router, useFocusEffect } from 'expo-router';
 import { useEffect, useState, useCallback } from 'react';
 import { getAllReports, Report } from '@/services/storageService';
+import { LocalizedText } from '@/components/LocalizedText';
+import { useLanguage } from '@/context/LanguageContext';
+import { translations } from '@/constants/Translations';
+
+type TranslationKey = keyof typeof translations.en;
 
 const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -21,6 +26,7 @@ const getStatusColor = (status: string) => {
 export default function ReportsScreen() {
     const [reports, setReports] = useState<Report[]>([]);
     const [loading, setLoading] = useState(true);
+    const { t } = useLanguage();
 
     useFocusEffect(
         useCallback(() => {
@@ -47,18 +53,29 @@ export default function ReportsScreen() {
         });
     };
 
+    const getLocalizedStatus = (status: string): TranslationKey => {
+        switch (status.toLowerCase()) {
+            case 'completed':
+                return 'completed';
+            case 'in progress':
+                return 'inProgress';
+            case 'not started':
+                return 'notStarted';
+            default:
+                return 'notStarted';
+        }
+    };
+
     if (reports.length === 0) {
         return (
             <View style={styles.emptyContainer}>
                 <IconSymbol name="doc.text" size={60} color="#ccc" />
-                <ThemedText style={styles.emptyText}>
-                    No reports found. Complete a survey to create your first report.
-                </ThemedText>
+                <LocalizedText style={styles.emptyText} textKey="noReportsFound" />
                 <TouchableOpacity 
                     style={styles.newSurveyButton}
                     onPress={() => router.push('/home')}
                 >
-                    <ThemedText style={styles.newSurveyButtonText}>Start New Survey</ThemedText>
+                    <LocalizedText style={styles.newSurveyButtonText} textKey="startNewSurvey" />
                 </TouchableOpacity>
             </View>
         );
@@ -82,37 +99,38 @@ export default function ReportsScreen() {
                         <View style={styles.reportContent}>
                             <View style={styles.headerRow}>
                                 <View style={styles.scopeContainer}>
-                                    <ThemedText style={styles.scopeText}>{item.scope}</ThemedText>
+                                    <LocalizedText style={styles.scopeText}>{item.scope}</LocalizedText>
                                 </View>
                                 <View style={[
                                     styles.priorityBadge, 
                                     { backgroundColor: getStatusColor(item.status) }
                                 ]}>
-                                    <ThemedText style={styles.priorityText}>
-                                        {item.status}
-                                    </ThemedText>
+                                    <LocalizedText 
+                                        style={styles.priorityText}
+                                        textKey={getLocalizedStatus(item.status)}
+                                    />
                                 </View>
                             </View>
 
                             <View style={styles.detailsContainer}>
                                 <View style={styles.areasContainer}>
-                                    <ThemedText style={styles.areasText}>
-                                        {item.description || 'No description provided'}
-                                    </ThemedText>
+                                    <LocalizedText style={styles.areasText}>
+                                        {item.description || t('noDescription')}
+                                    </LocalizedText>
                                 </View>
 
                                 <View style={styles.dateContainer}>
                                     <IconSymbol name="calendar" size={16} color="#666" />
-                                    <ThemedText style={styles.dateText}>
+                                    <LocalizedText style={styles.dateText}>
                                         {item.dateTime || item.date}
-                                    </ThemedText>
+                                    </LocalizedText>
                                 </View>
                                 
                                 <View style={styles.userContainer}>
                                     <IconSymbol name="person" size={16} color="#666" />
-                                    <ThemedText style={styles.userText}>
+                                    <LocalizedText style={styles.userText}>
                                         {item.userName}
-                                    </ThemedText>
+                                    </LocalizedText>
                                 </View>
                             </View>
                         </View>

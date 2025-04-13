@@ -1,7 +1,9 @@
 import { StyleSheet, View, Modal, TouchableOpacity, TextInput, ActivityIndicator, Alert } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
+import { LocalizedText } from '@/components/LocalizedText';
 import { useState } from 'react';
 import { IconSymbol } from './ui/IconSymbol';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface EmailModalProps {
   visible: boolean;
@@ -14,17 +16,18 @@ export function EmailModal({ visible, onClose, onSendEmail, loading = false }: E
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [emailError, setEmailError] = useState('');
+  const { t } = useLanguage();
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   const validateEmail = (email: string): boolean => {
     if (!email.trim()) {
-      setEmailError('Email is required');
+      setEmailError(t('enterEmail'));
       return false;
     }
     
     if (!emailRegex.test(email)) {
-      setEmailError('Please enter a valid email address');
+      setEmailError(t('validEmailRequired'));
       return false;
     }
     
@@ -45,12 +48,12 @@ export function EmailModal({ visible, onClose, onSendEmail, loading = false }: E
       if (result.success) {
         setEmail('');
         onClose();
-        Alert.alert('Success', result.message);
+        Alert.alert(t('success'), result.message);
       } else {
-        Alert.alert('Error', result.message);
+        Alert.alert(t('error'), result.message);
       }
     } catch (error) {
-      Alert.alert('Error', 'An unexpected error occurred. Please try again.');
+      Alert.alert(t('error'), t('unexpectedError'));
     } finally {
       setIsSubmitting(false);
     }
@@ -72,20 +75,18 @@ export function EmailModal({ visible, onClose, onSendEmail, loading = false }: E
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
           <View style={styles.modalHeader}>
-            <ThemedText style={styles.modalTitle}>Send Report via Email</ThemedText>
+            <LocalizedText style={styles.modalTitle} textKey="sendEmail" />
             <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
               <IconSymbol name="xmark" size={24} color="#666" />
             </TouchableOpacity>
           </View>
           
-          <ThemedText style={styles.modalText}>
-            Enter the recipient's email address to send this report.
-          </ThemedText>
+          <LocalizedText style={styles.modalText} textKey="emailInstructions" />
           
           <View style={styles.inputContainer}>
             <TextInput
               style={[styles.emailInput, emailError ? styles.inputError : null]}
-              placeholder="Email address"
+              placeholder={t('enterEmail')}
               placeholderTextColor="#999"
               keyboardType="email-address"
               autoCapitalize="none"
@@ -108,7 +109,7 @@ export function EmailModal({ visible, onClose, onSendEmail, loading = false }: E
               onPress={handleClose}
               disabled={isSubmitting}
             >
-              <ThemedText style={styles.cancelButtonText}>Cancel</ThemedText>
+              <LocalizedText style={styles.cancelButtonText} textKey="cancel" />
             </TouchableOpacity>
             
             <TouchableOpacity 
@@ -123,7 +124,7 @@ export function EmailModal({ visible, onClose, onSendEmail, loading = false }: E
               {isSubmitting ? (
                 <ActivityIndicator size="small" color="#fff" />
               ) : (
-                <ThemedText style={styles.sendButtonText}>Send</ThemedText>
+                <LocalizedText style={styles.sendButtonText} textKey="send" />
               )}
             </TouchableOpacity>
           </View>

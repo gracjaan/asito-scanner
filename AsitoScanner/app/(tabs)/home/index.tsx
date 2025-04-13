@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 
 import { ThemedText } from '@/components/ThemedText';
 import { IconSymbol } from '@/components/ui/IconSymbol';
+import { LocalizedText } from '@/components/LocalizedText';
 
 export default function HomeScreen() {
     const router = useRouter();
@@ -14,7 +15,7 @@ export default function HomeScreen() {
                 onPress={() => router.push('/home/building-parts')}
             >
                 <IconSymbol name="camera" size={50} color="#FF5A00" />
-                <ThemedText style={styles.buttonText}>Start Scanning</ThemedText>
+                <LocalizedText style={styles.buttonText} textKey="startScan" />
             </TouchableOpacity>
         </View>
     );

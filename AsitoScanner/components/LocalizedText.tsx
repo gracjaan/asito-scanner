@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text, TextProps } from 'react-native';
 import { useLanguage } from '@/context/LanguageContext';
-import { ThemedText } from './ThemedText';
+import { ThemedText, ThemedTextProps } from './ThemedText';
 
 type LocalizedTextProps = TextProps & {
   textKey?: keyof typeof import('@/constants/Translations').translations.en;
@@ -9,6 +9,7 @@ type LocalizedTextProps = TextProps & {
   fallback?: string;
   params?: Record<string, string | number>;
   useThemedText?: boolean;
+  type?: ThemedTextProps['type'];
 };
 
 export function LocalizedText({
@@ -17,6 +18,7 @@ export function LocalizedText({
   fallback,
   params = {},
   useThemedText = true,
+  type,
   ...props
 }: LocalizedTextProps) {
   const { t } = useLanguage();
@@ -42,7 +44,9 @@ export function LocalizedText({
     });
   }
   
-  const TextComponent = useThemedText ? ThemedText : Text;
+  if (useThemedText) {
+    return <ThemedText type={type} {...props}>{content}</ThemedText>;
+  }
   
-  return <TextComponent {...props}>{content}</TextComponent>;
+  return <Text {...props}>{content}</Text>;
 } 

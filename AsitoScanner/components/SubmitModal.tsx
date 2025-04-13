@@ -1,5 +1,6 @@
 import { StyleSheet, View, Modal, TouchableOpacity } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
+import { LocalizedText } from '@/components/LocalizedText';
 
 interface SubmitModalProps {
   visible: boolean;
@@ -18,25 +19,22 @@ export function SubmitModal({ visible, onCancel, onSubmit, onContinueToManualQue
     >
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
-          <ThemedText style={styles.modalTitle}>Section Complete</ThemedText>
-          <ThemedText style={styles.modalText}>
-            You have completed all questions for this section. 
-            Before submitting, you need to complete the additional manual questions in the next section.
-          </ThemedText>
+          <LocalizedText style={styles.modalTitle} textKey="sectionComplete" />
+          <LocalizedText style={styles.modalText} textKey="completeManualQuestions" />
           
           <View style={styles.modalButtons}>
             <TouchableOpacity 
               style={[styles.modalButton, styles.cancelButton]} 
               onPress={onCancel}
             >
-              <ThemedText style={styles.cancelButtonText}>Cancel</ThemedText>
+              <LocalizedText style={styles.cancelButtonText} textKey="cancel" />
             </TouchableOpacity>
             
             <TouchableOpacity 
               style={[styles.modalButton, styles.continueButton]} 
               onPress={onContinueToManualQuestions}
             >
-              <ThemedText style={styles.continueButtonText}>Next Section</ThemedText>
+              <LocalizedText style={styles.continueButtonText} textKey="next" />
             </TouchableOpacity>
           </View>
         </View>
