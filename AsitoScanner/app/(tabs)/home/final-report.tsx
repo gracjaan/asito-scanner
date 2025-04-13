@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Alert } from "react-native";
+import { View, StyleSheet, ScrollView, Image, TouchableOpacity, Alert } from "react-native";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { useSurvey } from "@/context/SurveyContext";
 import { router } from "expo-router";
@@ -7,6 +7,8 @@ import { EmailModal } from "@/components/EmailModal";
 import { sendReportByEmail } from "@/services/emailService";
 import { saveReport } from "@/services/storageService";
 import { ManualQuestion, SurveyQuestion } from "@/context/SurveyContext";
+import { LocalizedText } from "@/components/LocalizedText";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function FinalReport() {
     const {
@@ -18,7 +20,8 @@ export default function FinalReport() {
         surveyStatus,
         surveyDescription
     } = useSurvey();
-
+    
+    const { t } = useLanguage();
     const [showEmailModal, setShowEmailModal] = useState(false);
 
     const completedQuestions = questions.filter(q => q.completed);
@@ -26,7 +29,7 @@ export default function FinalReport() {
 
     // Group completed questions by location
     const questionsByLocation = completedQuestions.reduce((groups: Record<string, SurveyQuestion[]>, question) => {
-        const location = question.location || 'Other';
+        const location = question.location || t('other');
         if (!groups[location]) {
             groups[location] = [];
         }
@@ -93,7 +96,7 @@ export default function FinalReport() {
             placeholders.pop();
             placeholders.push(
                 <View key="more" style={[styles.imagePlaceholder, styles.moreImages]}>
-                    <Text style={styles.moreImagesText}>+{images.length - 2}</Text>
+                    <LocalizedText style={styles.moreImagesText}>+{images.length - 2}</LocalizedText>
                 </View>
             );
         }
@@ -110,7 +113,7 @@ export default function FinalReport() {
 
         // Group questions by building part
         const groupedQuestions = manualQuestions.reduce((groups: Record<string, ManualQuestion[]>, question) => {
-            const part = question.buildingPart || 'Other';
+            const part = question.buildingPart || t('other');
             if (!groups[part]) {
                 groups[part] = [];
             }
@@ -123,7 +126,7 @@ export default function FinalReport() {
 
         return (
             <View style={styles.manualQuestionsSection}>
-                <Text style={styles.manualQuestionsTitle}>Building Area Observations</Text>
+                <LocalizedText style={styles.manualQuestionsTitle} textKey="buildingAreaObservations" />
                 
                 {buildingParts.map(part => {
                     const partQuestions = groupedQuestions[part];
@@ -131,21 +134,21 @@ export default function FinalReport() {
                     
                     return (
                         <View key={part} style={styles.buildingPartSection}>
-                            <Text style={styles.buildingPartTitle}>{part}</Text>
+                            <LocalizedText style={styles.buildingPartTitle}>{part}</LocalizedText>
                             
                             <View style={styles.manualQuestionsContainer}>
                                 {partQuestions.map((question, index) => (
                                     <View key={question.id} style={styles.manualQuestionItem}>
-                                        <Text style={styles.manualQuestionText}>
+                                        <LocalizedText style={styles.manualQuestionText}>
                                             {question.question}
-                                        </Text>
-                                        <Text style={[
+                                        </LocalizedText>
+                                        <LocalizedText style={[
                                             styles.manualAnswerText, 
                                             question.answer === 'Yes' ? styles.yesAnswer : 
                                             question.answer === 'No' ? styles.noAnswer : null
                                         ]}>
-                                            {question.answer || "No answer provided"}
-                                        </Text>
+                                            {question.answer || t('noAnswerProvided')}
+                                        </LocalizedText>
                                         
                                         {index < partQuestions.length - 1 && !question.id.includes('comments') && (
                                             <View style={styles.questionDivider} />
@@ -165,9 +168,7 @@ export default function FinalReport() {
             return (
                 <View style={styles.emptyStateContainer}>
                     <IconSymbol name="exclamationmark.circle" size={50} color="#ccc" />
-                    <Text style={styles.emptyStateText}>
-                        No completed questions found. Please complete at least one question to generate a report.
-                    </Text>
+                    <LocalizedText style={styles.emptyStateText} textKey="noCompletedQuestions" />
                 </View>
             );
         }
@@ -180,24 +181,24 @@ export default function FinalReport() {
                     
                     return (
                         <View key={location} style={styles.locationSection}>
-                            <Text style={styles.locationTitle}>{location}</Text>
+                            <LocalizedText style={styles.locationTitle}>{location}</LocalizedText>
                             
                             {locationQuestions.map((question, index) => (
                                 <View key={question.id} style={styles.questionSection}>
-                                    <Text style={styles.questionText}>
+                                    <LocalizedText style={styles.questionText}>
                                         {question.displayText || question.text}
-                                    </Text>
+                                    </LocalizedText>
                                     
                                     <View style={styles.analyticalQuestionContainer}>
-                                        <Text style={styles.analyticalQuestionText}>
+                                        <LocalizedText style={styles.analyticalQuestionText}>
                                             {question.analyticalQuestion || question.text}
-                                        </Text>
+                                        </LocalizedText>
                                     </View>
 
                                     <View style={styles.answerBox}>
-                                        <Text style={styles.answerText}>
-                                            {question.answer || "No analysis available for this question."}
-                                        </Text>
+                                        <LocalizedText style={styles.answerText}>
+                                            {question.answer || t('noAnalysisAvailable')}
+                                        </LocalizedText>
                                     </View>
 
                                     {renderImagePlaceholders(question.images)}
@@ -217,26 +218,26 @@ export default function FinalReport() {
     return (
         <View style={styles.mainContainer}>
             <ScrollView style={styles.container}>
-                <Text style={styles.title}>Nationale Nederlandse</Text>
+                <LocalizedText style={styles.title} textKey="nationaleNederlandse" />
                 <View style={styles.infoSection}>
                     <View style={styles.infoRow}>
                         <IconSymbol name="person" size={20} color="#000" />
-                        <Text style={styles.infoText}>{userName}</Text>
+                        <LocalizedText style={styles.infoText}>{userName}</LocalizedText>
                     </View>
 
                     <View style={styles.infoRow}>
                         <IconSymbol name="calendar" size={20} color="#000" />
-                        <Text style={styles.infoText}>{surveyDateTime}</Text>
+                        <LocalizedText style={styles.infoText}>{surveyDateTime}</LocalizedText>
                     </View>
 
                     <View style={styles.infoRow}>
                         <IconSymbol name="hand.thumbsup" size={20} color="#000" />
-                        <Text style={styles.infoText}>{surveyStatus}</Text>
+                        <LocalizedText style={styles.infoText}>{surveyStatus}</LocalizedText>
                     </View>
 
                     <View style={styles.infoRow}>
                         <IconSymbol name="doc.text" size={20} color="#000" />
-                        <Text style={styles.descriptionText}>{surveyDescription}</Text>
+                        <LocalizedText style={styles.descriptionText}>{surveyDescription}</LocalizedText>
                     </View>
                 </View>
 

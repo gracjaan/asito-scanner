@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, Image, ActivityIndicator, TouchableOpacity, SafeAreaView } from "react-native";
+import { View, StyleSheet, ScrollView, Image, ActivityIndicator, TouchableOpacity, SafeAreaView } from "react-native";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
@@ -6,12 +6,15 @@ import { getReportById, Report } from "@/services/storageService";
 import { router } from "expo-router";
 import { EmailModal } from "@/components/EmailModal";
 import { sendReportByEmail } from "@/services/emailService";
+import { LocalizedText } from "@/components/LocalizedText";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function ReportDetail() {
     const { id } = useLocalSearchParams<{ id: string }>();
     const [report, setReport] = useState<Report | null>(null);
     const [loading, setLoading] = useState(true);
     const [showEmailModal, setShowEmailModal] = useState(false);
+    const { t } = useLanguage();
 
     useEffect(() => {
         loadReport();
@@ -30,12 +33,12 @@ export default function ReportDetail() {
                 setReport(reportData);
             } else {
                 // Report not found
-                alert('Report not found');
+                alert(t('reportNotFound'));
                 router.back();
             }
         } catch (error) {
             console.error('Error loading report:', error);
-            alert('Error loading report');
+            alert(t('error'));
         } finally {
             setLoading(false);
         }
@@ -45,7 +48,7 @@ export default function ReportDetail() {
         if (!report) {
             return {
                 success: false,
-                message: "Report data not available."
+                message: t('reportNotFound')
             };
         }
 
@@ -55,7 +58,7 @@ export default function ReportDetail() {
             console.error("Error sending email:", error);
             return {
                 success: false,
-                message: "Failed to send email. Please try again."
+                message: t('unexpectedError')
             };
         }
     };
@@ -76,7 +79,7 @@ export default function ReportDetail() {
             placeholders.pop();
             placeholders.push(
                 <View key="more" style={[styles.imagePlaceholder, styles.moreImages]}>
-                    <Text style={styles.moreImagesText}>+{images.length - 2}</Text>
+                    <LocalizedText style={styles.moreImagesText}>+{images.length - 2}</LocalizedText>
                 </View>
             );
         }
@@ -95,17 +98,17 @@ export default function ReportDetail() {
         
         return (
             <View style={styles.manualQuestionsSection}>
-                <Text style={styles.manualQuestionsTitle}>Additional Observations</Text>
+                <LocalizedText style={styles.manualQuestionsTitle} textKey="additionalObservations" />
                 
                 <View style={styles.manualQuestionsContainer}>
                     {manualQuestions.map((question, index) => (
                         <View key={question.id} style={styles.manualQuestionItem}>
-                            <Text style={styles.manualQuestionText}>
+                            <LocalizedText style={styles.manualQuestionText}>
                                 {question.question}
-                            </Text>
-                            <Text style={styles.manualAnswerText}>
-                                {question.answer || "No answer provided"}
-                            </Text>
+                            </LocalizedText>
+                            <LocalizedText style={styles.manualAnswerText}>
+                                {question.answer || t('noAnswerProvided')}
+                            </LocalizedText>
                             
                             {index < manualQuestions.length - 1 && (
                                 <View style={styles.questionDivider} />
@@ -121,7 +124,7 @@ export default function ReportDetail() {
         return (
             <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color="#FF5A00" />
-                <Text style={styles.loadingText}>Loading report...</Text>
+                <LocalizedText style={styles.loadingText} textKey="loadingReport" />
             </View>
         );
     }
@@ -130,7 +133,7 @@ export default function ReportDetail() {
         return (
             <View style={styles.errorContainer}>
                 <IconSymbol name="exclamationmark.circle" size={50} color="#ccc" />
-                <Text style={styles.errorText}>Report not found</Text>
+                <LocalizedText style={styles.errorText} textKey="reportNotFound" />
             </View>
         );
     }
@@ -140,26 +143,26 @@ export default function ReportDetail() {
     return (
         <SafeAreaView style={styles.mainContainer}>
             <ScrollView style={styles.container}>
-                <Text style={styles.title}>Nationale Nederlandse</Text>
+                <LocalizedText style={styles.title} textKey="nationaleNederlandse" />
                 <View style={styles.infoSection}>
                     <View style={styles.infoRow}>
                         <IconSymbol name="person" size={20} color="#000" />
-                        <Text style={styles.infoText}>{report.userName}</Text>
+                        <LocalizedText style={styles.infoText}>{report.userName}</LocalizedText>
                     </View>
 
                     <View style={styles.infoRow}>
                         <IconSymbol name="calendar" size={20} color="#000" />
-                        <Text style={styles.infoText}>{report.dateTime || report.date}</Text>
+                        <LocalizedText style={styles.infoText}>{report.dateTime || report.date}</LocalizedText>
                     </View>
 
                     <View style={styles.infoRow}>
                         <IconSymbol name="hand.thumbsup" size={20} color="#000" />
-                        <Text style={styles.infoText}>{report.status}</Text>
+                        <LocalizedText style={styles.infoText}>{report.status}</LocalizedText>
                     </View>
 
                     <View style={styles.infoRow}>
                         <IconSymbol name="doc.text" size={20} color="#000" />
-                        <Text style={styles.descriptionText}>{report.description}</Text>
+                        <LocalizedText style={styles.descriptionText}>{report.description}</LocalizedText>
                     </View>
                 </View>
 
@@ -168,20 +171,20 @@ export default function ReportDetail() {
                 {completedQuestions.length > 0 ? (
                     completedQuestions.map((question, index) => (
                         <View key={question.id} style={styles.questionSection}>
-                            <Text style={styles.questionText}>
+                            <LocalizedText style={styles.questionText}>
                                 {question.displayText || question.text}
-                            </Text>
+                            </LocalizedText>
                             
                             <View style={styles.analyticalQuestionContainer}>
-                                <Text style={styles.analyticalQuestionText}>
+                                <LocalizedText style={styles.analyticalQuestionText}>
                                     {question.analyticalQuestion || question.text}
-                                </Text>
+                                </LocalizedText>
                             </View>
 
                             <View style={styles.answerBox}>
-                                <Text style={styles.answerText}>
-                                    {question.answer || "No analysis available for this question."}
-                                </Text>
+                                <LocalizedText style={styles.answerText}>
+                                    {question.answer || t('noAnalysisAvailable')}
+                                </LocalizedText>
                             </View>
 
                             {renderImagePlaceholders(question.images)}
@@ -194,9 +197,7 @@ export default function ReportDetail() {
                 ) : (
                     <View style={styles.emptyStateContainer}>
                         <IconSymbol name="exclamationmark.circle" size={50} color="#ccc" />
-                        <Text style={styles.emptyStateText}>
-                            No completed questions found in this report.
-                        </Text>
+                        <LocalizedText style={styles.emptyStateText} textKey="noCompletedQuestionsInReport" />
                     </View>
                 )}
                 

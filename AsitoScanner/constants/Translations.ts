@@ -47,6 +47,20 @@ export const translations = {
     notStarted: 'Not Started',
     noDescription: 'No description provided',
     
+    // Final Report
+    nationaleNederlandse: 'Nationale Nederlandse',
+    buildingAreaObservations: 'Building Area Observations',
+    noCompletedQuestions: 'No completed questions found. Please complete at least one question to generate a report.',
+    noAnalysisAvailable: 'No analysis available for this question.',
+    noAnswerProvided: 'No answer provided',
+    other: 'Other',
+    
+    // Report Detail
+    additionalObservations: 'Additional Observations',
+    loadingReport: 'Loading report...',
+    reportNotFound: 'Report not found',
+    noCompletedQuestionsInReport: 'No completed questions found in this report.',
+    
     // Building Parts
     buildingParts: 'Building Parts',
     entrance: 'Entrance',
@@ -65,6 +79,30 @@ export const translations = {
     error: 'Error',
     tryAgain: 'Try Again',
     send: 'Send',
+    
+    // ManualQuestionsModal
+    questions: 'Questions',
+    pleaseAnswerQuestions: 'Please answer these questions for the',
+    noQuestionsAvailable: 'No questions available for this building part.',
+    requiredQuestions: 'Required Questions',
+    pleaseAnswerRequired: 'Please answer the following required questions before submitting:',
+    enterYourAnswer: 'Enter your answer',
+    skip: 'Skip',
+    
+    // Common Questions
+    plantsPresence: 'Are there several plants in the {area}?',
+    plantsCondition: 'Are the plants in good condition? (not dead)',
+    plantsReal: 'Are they real?',
+    plantsHeight: 'Are the plants at the {area} on average higher than 1 meter?',
+    music: 'Is music being played in the background?',
+    airQuality: 'Does the air quality feel pleasant? (not musty or dusty)?',
+    smell: 'Does it smell pleasant around the {area}?',
+    notableFindings: 'Please explain some notable findings for the {area} here:',
+    toiletFragrance: 'Is fragrance consciously used? (dispensers, candles, etc.)',
+    lookReal: 'Look real, but can\'t tell for sure',
+    lookFake: 'Look fake & artificial but can\'t tell for sure',
+    yes: 'Yes',
+    no: 'No',
   },
   nl: {
     // Common
@@ -112,6 +150,20 @@ export const translations = {
     notStarted: 'Niet Gestart',
     noDescription: 'Geen beschrijving gevonden',
     
+    // Final Report
+    nationaleNederlandse: 'Nationale Nederlandse',
+    buildingAreaObservations: 'Gebiedsobservaties',
+    noCompletedQuestions: 'Geen voltooide vragen gevonden. Voltooi ten minste één vraag om een rapport te genereren.',
+    noAnalysisAvailable: 'Geen analyse beschikbaar voor deze vraag.',
+    noAnswerProvided: 'Geen antwoord gegeven',
+    other: 'Overig',
+    
+    // Report Detail
+    additionalObservations: 'Aanvullende Observaties',
+    loadingReport: 'Rapport laden...',
+    reportNotFound: 'Rapport niet gevonden',
+    noCompletedQuestionsInReport: 'Geen voltooide vragen gevonden in dit rapport.',
+    
     // Building Parts
     buildingParts: 'Gebouwdelen',
     entrance: 'Ingang',
@@ -130,6 +182,30 @@ export const translations = {
     error: 'Fout',
     tryAgain: 'Probeer Opnieuw',
     send: 'Versturen',
+    
+    // ManualQuestionsModal
+    questions: 'Vragen',
+    pleaseAnswerQuestions: 'Beantwoord deze vragen voor de',
+    noQuestionsAvailable: 'Geen vragen beschikbaar voor dit gebouwdeel.',
+    requiredQuestions: 'Vereiste Vragen',
+    pleaseAnswerRequired: 'Beantwoord de volgende vereiste vragen voordat u indient:',
+    enterYourAnswer: 'Voer uw antwoord in',
+    skip: 'Overslaan',
+    
+    // Common Questions
+    plantsPresence: 'Zijn er meerdere planten in de {area}?',
+    plantsCondition: 'Zijn de planten in goede conditie? (niet dood)',
+    plantsReal: 'Zijn ze echt?',
+    plantsHeight: 'Zijn de planten in de {area} gemiddeld hoger dan 1 meter?',
+    music: 'Wordt er muziek afgespeeld in de achtergrond?',
+    airQuality: 'Voelt de luchtkwaliteit er lekker aan? (niet mustig of stofig)?',
+    smell: 'Voelt het er lekker aan om de {area} rondom?',
+    notableFindings: 'Plaats hier enkele opvallende ontdekkingen voor de {area}:',
+    toiletFragrance: 'Wordt er gewichtelijk gebruik gemaakt van geur? (dispensers, kaarsen, etc.)',
+    lookReal: 'Kijk echt uit, maar je kunt het niet zeker zeggen',
+    lookFake: 'Kijk foutig en artificiëel uit, maar je kunt het niet zeker zeggen',
+    yes: 'Ja',
+    no: 'Nee',
   }
 };
 

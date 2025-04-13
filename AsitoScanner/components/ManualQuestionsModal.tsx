@@ -2,6 +2,8 @@ import { StyleSheet, View, Modal, TouchableOpacity, TextInput, ScrollView, Alert
 import { ThemedText } from '@/components/ThemedText';
 import { useState, useEffect } from 'react';
 import { ManualQuestion } from '@/context/SurveyContext';
+import { LocalizedText } from '@/components/LocalizedText';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface ManualQuestionsModalProps {
   visible: boolean;
@@ -10,67 +12,109 @@ interface ManualQuestionsModalProps {
   buildingPart?: string; // Add buildingPart prop
 }
 
+// Enhanced ManualQuestion type for internal use in this component
+interface EnhancedManualQuestion extends ManualQuestion {
+  translationKey?: string;
+  areaName?: string;
+}
+
 export function ManualQuestionsModal({ visible, onCancel, onSubmit, buildingPart = 'Other' }: ManualQuestionsModalProps) {
+  const { t, language } = useLanguage();
+  
   // Debug the building part we're seeing
   console.log(`ManualQuestionsModal received buildingPart: "${buildingPart}"`);
+
+  // Helper function to get translated question text
+  const getLocalizedQuestion = (q: EnhancedManualQuestion): string => {
+    // If no translationKey is specified, return the original question
+    if (!q.translationKey) return q.question;
+    
+    try {
+      // If the question has an area specified, replace the {area} placeholder
+      if (q.areaName) {
+        return t(q.translationKey as any).replace('{area}', q.areaName.toLowerCase());
+      }
+      // Otherwise just use the translation key
+      return t(q.translationKey as any);
+    } catch (error) {
+      console.error(`Error translating question with key: ${q.translationKey}`, error);
+      return q.question; // Fallback to original question if translation fails
+    }
+  };
+
+  // Get translated yes/no values
+  const YES = t('yes' as any);
+  const NO = t('no' as any);
   
   // All building-part specific questions
-  const allQuestions: ManualQuestion[] = [
+  const baseQuestions: EnhancedManualQuestion[] = [
     // Entrance
     {
       id: 'entrance-plants-presence',
       question: 'Are there several plants in the entrance area?',
+      translationKey: 'plantsPresence',
+      areaName: 'entrance',
       answer: '',
       required: true,
       buildingPart: 'Entrance',
-      options: ['Yes', 'No']
+      options: [YES, NO]
     },
     {
       id: 'entrance-plants-condition',
       question: 'Are the plants in good condition? (not dead)',
+      translationKey: 'plantsCondition',
       answer: '',
       buildingPart: 'Entrance',
-      options: ['Yes', 'No']
+      options: [YES, NO]
     },
     {
       id: 'entrance-plants-real',
       question: 'Are they real?',
+      translationKey: 'plantsReal',
       answer: '',
       buildingPart: 'Entrance',
-      options: ['Yes', 'No']
+      options: [YES, NO]
     },
     {
       id: 'entrance-plants-height',
       question: 'Are the plants at the entrance on average higher than 1 meter?',
+      translationKey: 'plantsHeight',
+      areaName: 'entrance',
       answer: '',
       buildingPart: 'Entrance',
-      options: ['Yes', 'No']
+      options: [YES, NO]
     },
     {
       id: 'entrance-music',
       question: 'Is music being played in the background?',
+      translationKey: 'music',
       answer: '',
       required: true,
       buildingPart: 'Entrance',
-      options: ['Yes', 'No']
+      options: [YES, NO]
     },
     {
       id: 'entrance-air-quality',
       question: 'Does the air quality feel pleasant? (not musty or dusty)?',
+      translationKey: 'airQuality',
       answer: '',
       buildingPart: 'Entrance',
-      options: ['Yes', 'No']
+      options: [YES, NO]
     },
     {
       id: 'entrance-smell',
       question: 'Does it smell pleasant around the entrance area?',
+      translationKey: 'smell',
+      areaName: 'entrance',
       answer: '',
       buildingPart: 'Entrance',
-      options: ['Yes', 'No']
+      options: [YES, NO]
     },
     {
       id: 'entrance-comments',
       question: 'Please explain some notable findings for the entrance area here:',
+      translationKey: 'notableFindings',
+      areaName: 'entrance',
       answer: '',
       buildingPart: 'Entrance'
     },
@@ -79,57 +123,69 @@ export function ManualQuestionsModal({ visible, onCancel, onSubmit, buildingPart
     {
       id: 'break-plants-presence',
       question: 'Are there several plants in the break/chill-out area?',
+      translationKey: 'plantsPresence',
+      areaName: 'break/chill-out area',
       answer: '',
       required: true,
       buildingPart: 'Break/Chill-Out Area',
-      options: ['Yes', 'No']
+      options: [YES, NO]
     },
     {
       id: 'break-plants-condition',
       question: 'Are the plants in good condition? (not dead)',
+      translationKey: 'plantsCondition',
       answer: '',
       buildingPart: 'Break/Chill-Out Area',
-      options: ['Yes', 'No']
+      options: [YES, NO]
     },
     {
       id: 'break-plants-real',
       question: 'Are they real?',
+      translationKey: 'plantsReal',
       answer: '',
       buildingPart: 'Break/Chill-Out Area',
-      options: ['Yes', 'No', 'Look real, but can\'t tell for sure', 'Look fake & artificial but can\'t tell for sure']
+      options: [YES, NO, t('lookReal' as any), t('lookFake' as any)]
     },
     {
       id: 'break-plants-height',
       question: 'Are the plants at the break/chill-out area on average higher than 1 meter?',
+      translationKey: 'plantsHeight',
+      areaName: 'break/chill-out area',
       answer: '',
       buildingPart: 'Break/Chill-Out Area',
-      options: ['Yes', 'No']
+      options: [YES, NO]
     },
     {
       id: 'break-music',
       question: 'Is music being played in the background?',
+      translationKey: 'music',
       answer: '',
       required: true,
       buildingPart: 'Break/Chill-Out Area',
-      options: ['Yes', 'No']
+      options: [YES, NO]
     },
     {
       id: 'break-air-quality',
       question: 'Does the air quality feel pleasant? (not musty or dusty)?',
+      translationKey: 'airQuality',
       answer: '',
       buildingPart: 'Break/Chill-Out Area',
-      options: ['Yes', 'No']
+      options: [YES, NO]
     },
     {
       id: 'break-smell',
       question: 'Does it smell pleasant around the break/chill-out area?',
+      translationKey: 'smell',
+      areaName: 'break/chill-out area',
       answer: '',
       buildingPart: 'Break/Chill-Out Area',
-      options: ['Yes', 'No']
+      options: [YES, NO]
     },
     {
       id: 'break-comments',
       question: 'Please explain some notable findings for the break/chill-out area here:',
+      translationKey: 'notableFindings',
+      areaName: 'break/chill-out area',
       answer: '',
       buildingPart: 'Break/Chill-Out Area'
     },
@@ -138,57 +194,69 @@ export function ManualQuestionsModal({ visible, onCancel, onSubmit, buildingPart
     {
       id: 'corridor-plants-presence',
       question: 'Are there several plants in the Corridor/Hall area?',
+      translationKey: 'plantsPresence',
+      areaName: 'corridor/hall area',
       answer: '',
       required: true,
       buildingPart: 'Corridor',
-      options: ['Yes', 'No']
+      options: [YES, NO]
     },
     {
       id: 'corridor-plants-condition',
       question: 'Are the plants in good condition? (not dead)',
+      translationKey: 'plantsCondition',
       answer: '',
       buildingPart: 'Corridor',
-      options: ['Yes', 'No']
+      options: [YES, NO]
     },
     {
       id: 'corridor-plants-real',
       question: 'Are they real?',
+      translationKey: 'plantsReal',
       answer: '',
       buildingPart: 'Corridor',
-      options: ['Yes', 'No', 'Look real, but can\'t tell for sure', 'Look fake & artificial but can\'t tell for sure']
+      options: [YES, NO, t('lookReal' as any), t('lookFake' as any)]
     },
     {
       id: 'corridor-plants-height',
       question: 'Are the plants at the entrance on average higher than 1 meter?',
+      translationKey: 'plantsHeight',
+      areaName: 'corridor/hall area',
       answer: '',
       buildingPart: 'Corridor',
-      options: ['Yes', 'No']
+      options: [YES, NO]
     },
     {
       id: 'corridor-music',
       question: 'Is music being played in the background?',
+      translationKey: 'music',
       answer: '',
       required: true,
       buildingPart: 'Corridor',
-      options: ['Yes', 'No']
+      options: [YES, NO]
     },
     {
       id: 'corridor-air-quality',
       question: 'Does the air quality feels pleasant? (not musty or dusty)?',
+      translationKey: 'airQuality',
       answer: '',
       buildingPart: 'Corridor',
-      options: ['Yes', 'No']
+      options: [YES, NO]
     },
     {
       id: 'corridor-smell',
       question: 'Does it smell pleasant around the corridor/hall area?',
+      translationKey: 'smell',
+      areaName: 'corridor/hall area',
       answer: '',
       buildingPart: 'Corridor',
-      options: ['Yes', 'No']
+      options: [YES, NO]
     },
     {
       id: 'corridor-comments',
       question: 'Please explain some notable findings for the corridor/hall area here:',
+      translationKey: 'notableFindings',
+      areaName: 'corridor/hall area',
       answer: '',
       buildingPart: 'Corridor'
     },
@@ -197,57 +265,69 @@ export function ManualQuestionsModal({ visible, onCancel, onSubmit, buildingPart
     {
       id: 'food-plants-presence',
       question: 'Are there several plants in the Food&Drink area?',
+      translationKey: 'plantsPresence',
+      areaName: 'food&drink area',
       answer: '',
       required: true,
       buildingPart: 'Food&Drink Area',
-      options: ['Yes', 'No']
+      options: [YES, NO]
     },
     {
       id: 'food-plants-condition',
       question: 'Are the plants in good condition? (not dead)',
+      translationKey: 'plantsCondition',
       answer: '',
       buildingPart: 'Food&Drink Area',
-      options: ['Yes', 'No']
+      options: [YES, NO]
     },
     {
       id: 'food-plants-real',
       question: 'Are they real?',
+      translationKey: 'plantsReal',
       answer: '',
       buildingPart: 'Food&Drink Area',
-      options: ['Yes', 'No']
+      options: [YES, NO]
     },
     {
       id: 'food-plants-height',
       question: 'Are the plants at the Food&Drink area on average higher than 1 meter?',
+      translationKey: 'plantsHeight',
+      areaName: 'food&drink area',
       answer: '',
       buildingPart: 'Food&Drink Area',
-      options: ['Yes', 'No']
+      options: [YES, NO]
     },
     {
       id: 'food-music',
       question: 'Is music being played in the background?',
+      translationKey: 'music',
       answer: '',
       required: true,
       buildingPart: 'Food&Drink Area',
-      options: ['Yes', 'No']
+      options: [YES, NO]
     },
     {
       id: 'food-air-quality',
       question: 'Does the air quality feel pleasant? (not musty or dusty)?',
+      translationKey: 'airQuality',
       answer: '',
       buildingPart: 'Food&Drink Area',
-      options: ['Yes', 'No']
+      options: [YES, NO]
     },
     {
       id: 'food-smell',
       question: 'Does it smell pleasant around the Food&Drink area?',
+      translationKey: 'smell',
+      areaName: 'food&drink area',
       answer: '',
       buildingPart: 'Food&Drink Area',
-      options: ['Yes', 'No']
+      options: [YES, NO]
     },
     {
       id: 'food-comments',
       question: 'Please explain some notable findings for the Food&Drink area here:',
+      translationKey: 'notableFindings',
+      areaName: 'food&drink area',
       answer: '',
       buildingPart: 'Food&Drink Area'
     },
@@ -256,57 +336,69 @@ export function ManualQuestionsModal({ visible, onCancel, onSubmit, buildingPart
     {
       id: 'work-plants-presence',
       question: 'Are there several plants in the workplaces area?',
+      translationKey: 'plantsPresence',
+      areaName: 'workplaces',
       answer: '',
       required: true,
       buildingPart: 'Workplaces',
-      options: ['Yes', 'No']
+      options: [YES, NO]
     },
     {
       id: 'work-plants-condition',
       question: 'Are the plants in good condition? (not dead)',
+      translationKey: 'plantsCondition',
       answer: '',
       buildingPart: 'Workplaces',
-      options: ['Yes', 'No']
+      options: [YES, NO]
     },
     {
       id: 'work-plants-real',
       question: 'Are they real?',
+      translationKey: 'plantsReal',
       answer: '',
       buildingPart: 'Workplaces',
-      options: ['Yes', 'No']
+      options: [YES, NO]
     },
     {
       id: 'work-plants-height',
       question: 'Are the plants at the workplaces on average higher than 1 meter?',
+      translationKey: 'plantsHeight',
+      areaName: 'workplaces',
       answer: '',
       buildingPart: 'Workplaces',
-      options: ['Yes', 'No']
+      options: [YES, NO]
     },
     {
       id: 'work-music',
       question: 'Is music being played in the background?',
+      translationKey: 'music',
       answer: '',
       required: true,
       buildingPart: 'Workplaces',
-      options: ['Yes', 'No']
+      options: [YES, NO]
     },
     {
       id: 'work-air-quality',
       question: 'Does the air quality feel pleasant? (not musty or dusty)?',
+      translationKey: 'airQuality',
       answer: '',
       buildingPart: 'Workplaces',
-      options: ['Yes', 'No']
+      options: [YES, NO]
     },
     {
       id: 'work-smell',
       question: 'Does it smell pleasant around the workplaces?',
+      translationKey: 'smell',
+      areaName: 'workplaces',
       answer: '',
       buildingPart: 'Workplaces',
-      options: ['Yes', 'No']
+      options: [YES, NO]
     },
     {
       id: 'work-comments',
       question: 'Please explain some notable findings for the workplaces area here:',
+      translationKey: 'notableFindings',
+      areaName: 'workplaces',
       answer: '',
       buildingPart: 'Workplaces'
     },
@@ -315,46 +407,69 @@ export function ManualQuestionsModal({ visible, onCancel, onSubmit, buildingPart
     {
       id: 'toilet-music',
       question: 'In the toilet area, is music being played in the background?',
+      translationKey: 'music',
       answer: '',
       required: true,
       buildingPart: 'Toilets',
-      options: ['Yes', 'No']
+      options: [YES, NO]
     },
     {
       id: 'toilet-air-quality',
       question: 'Does the air quality feel pleasant? (not musty or dusty)?',
+      translationKey: 'airQuality',
       answer: '',
       buildingPart: 'Toilets',
-      options: ['Yes', 'No']
+      options: [YES, NO]
     },
     {
       id: 'toilet-smell',
       question: 'Does it smell pleasant around the toilet area?',
+      translationKey: 'smell',
+      areaName: 'toilet area',
       answer: '',
       buildingPart: 'Toilets',
-      options: ['Yes', 'No']
+      options: [YES, NO]
     },
     {
       id: 'toilet-fragrance',
       question: 'Is fragrance consciously used? (dispensers, candles, etc.)',
+      translationKey: 'toiletFragrance',
       answer: '',
       buildingPart: 'Toilets',
-      options: ['Yes', 'No']
+      options: [YES, NO]
     },
     {
       id: 'toilet-comments',
       question: 'Please explain some notable findings for the toilet area here:',
+      translationKey: 'notableFindings',
+      areaName: 'toilet area',
       answer: '',
       buildingPart: 'Toilets'
     }
   ];
+
+  // Process questions to include translated question text
+  const processedQuestions: ManualQuestion[] = baseQuestions.map(q => {
+    // Create a copy of the question with the translated question text
+    const processedQuestion: ManualQuestion = {
+      ...q,
+      question: getLocalizedQuestion(q)
+    };
+    
+    // Remove our custom fields that aren't part of the ManualQuestion type
+    const finalQuestion = processedQuestion as any;
+    delete finalQuestion.translationKey;
+    delete finalQuestion.areaName;
+    
+    return finalQuestion as ManualQuestion;
+  });
 
   // Filter questions based on current building part
   const [questions, setQuestions] = useState<ManualQuestion[]>([]);
 
   // Define a function to normalize building part names
   const normalizeBuildingPart = (part?: string): string => {
-    if (!part) return 'Other';
+    if (!part) return t('other');
     
     const mappings: Record<string, string> = {
       'Entrance': 'Entrance',
@@ -377,7 +492,7 @@ export function ManualQuestionsModal({ visible, onCancel, onSubmit, buildingPart
     const normalizedBuildingPart = normalizeBuildingPart(buildingPart);
     
     // Filter questions based on current building part
-    const filteredQuestions = allQuestions.filter(q => {
+    const filteredQuestions = processedQuestions.filter(q => {
       const questionNormalizedPart = normalizeBuildingPart(q.buildingPart);
       const isMatch = questionNormalizedPart === normalizedBuildingPart;
       
@@ -396,12 +511,12 @@ export function ManualQuestionsModal({ visible, onCancel, onSubmit, buildingPart
       console.warn(`No manual questions found for building part: "${buildingPart}" (normalized: "${normalizedBuildingPart}")`);
       
       // Debug all available building parts in the questions
-      const availableParts = [...new Set(allQuestions.map(q => q.buildingPart))];
+      const availableParts = [...new Set(processedQuestions.map(q => q.buildingPart))];
       console.log(`Available building parts in questions: ${JSON.stringify(availableParts)}`);
     }
     
     setQuestions(filteredQuestions);
-  }, [buildingPart, visible]);
+  }, [buildingPart, visible, language]); // Added language as a dependency to re-translate when language changes
 
   // Update answer for a specific question
   const updateAnswer = (id: string, answer: string) => {
@@ -420,8 +535,8 @@ export function ManualQuestionsModal({ visible, onCancel, onSubmit, buildingPart
     
     if (unansweredRequired.length > 0) {
       Alert.alert(
-        'Required Questions',
-        `Please answer the following required questions before submitting:\n\n${unansweredRequired.join('\n')}`,
+        t('requiredQuestions' as any),
+        `${t('pleaseAnswerRequired' as any)}\n\n${unansweredRequired.join('\n')}`,
         [{ text: 'OK' }]
       );
       return;
@@ -445,12 +560,12 @@ export function ManualQuestionsModal({ visible, onCancel, onSubmit, buildingPart
             ]}
             onPress={() => updateAnswer(question.id, option)}
           >
-            <ThemedText style={[
+            <LocalizedText style={[
               styles.optionText,
               question.answer === option && styles.selectedOptionText
             ]}>
               {option}
-            </ThemedText>
+            </LocalizedText>
           </TouchableOpacity>
         ))}
       </View>
@@ -466,20 +581,20 @@ export function ManualQuestionsModal({ visible, onCancel, onSubmit, buildingPart
     >
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
-          <ThemedText style={styles.modalTitle}>
-            {buildingPart} Questions
-          </ThemedText>
-          <ThemedText style={styles.modalSubtitle}>
-            Please answer these questions for the {buildingPart.toLowerCase()}
-          </ThemedText>
+          <LocalizedText style={styles.modalTitle}>
+            {buildingPart} {t('questions' as any)}
+          </LocalizedText>
+          <LocalizedText style={styles.modalSubtitle}>
+            {t('pleaseAnswerQuestions' as any)} {buildingPart.toLowerCase()}
+          </LocalizedText>
           
           {questions.length > 0 ? (
             <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
               {questions.map((item) => (
                 <View key={item.id} style={styles.questionContainer}>
-                  <ThemedText style={styles.questionText}>
-                    {item.question} {item.required && <ThemedText style={styles.requiredIndicator}>*</ThemedText>}
-                  </ThemedText>
+                  <LocalizedText style={styles.questionText}>
+                    {item.question} {item.required && <LocalizedText style={styles.requiredIndicator}>*</LocalizedText>}
+                  </LocalizedText>
                   
                   {renderOptionButtons(item)}
                   
@@ -489,7 +604,7 @@ export function ManualQuestionsModal({ visible, onCancel, onSubmit, buildingPart
                       style={[styles.input, item.id.includes('comments') ? styles.commentInput : {}]}
                       value={item.answer}
                       onChangeText={(text) => updateAnswer(item.id, text)}
-                      placeholder="Enter your answer"
+                      placeholder={t('enterYourAnswer' as any)}
                       multiline
                       numberOfLines={item.id.includes('comments') ? 4 : 2}
                     />
@@ -499,9 +614,7 @@ export function ManualQuestionsModal({ visible, onCancel, onSubmit, buildingPart
             </ScrollView>
           ) : (
             <View style={styles.noQuestionsContainer}>
-              <ThemedText style={styles.noQuestionsText}>
-                No questions available for this building part.
-              </ThemedText>
+              <LocalizedText style={styles.noQuestionsText} textKey="noQuestionsAvailable" />
             </View>
           )}
           
@@ -510,7 +623,7 @@ export function ManualQuestionsModal({ visible, onCancel, onSubmit, buildingPart
               style={[styles.modalButton, styles.cancelButton]} 
               onPress={onCancel}
             >
-              <ThemedText style={styles.cancelButtonText}>Back</ThemedText>
+              <LocalizedText style={styles.cancelButtonText} textKey="back" />
             </TouchableOpacity>
             
             <TouchableOpacity 
@@ -518,9 +631,9 @@ export function ManualQuestionsModal({ visible, onCancel, onSubmit, buildingPart
               onPress={handleSubmit}
               disabled={questions.length === 0}
             >
-              <ThemedText style={styles.submitButtonText}>
-                {questions.length > 0 ? "Submit" : "Skip"}
-              </ThemedText>
+              <LocalizedText style={styles.submitButtonText}>
+                {questions.length > 0 ? t('submit' as any) : t('skip' as any)}
+              </LocalizedText>
             </TouchableOpacity>
           </View>
         </View>
