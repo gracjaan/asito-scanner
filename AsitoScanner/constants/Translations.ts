@@ -89,8 +89,10 @@ export const translations = {
     // Building Parts and Special Titles
     breakchill: 'Break/Chill-Out Area',
     breakchilloutarea: 'Break/Chill-Out Area',
+    'breakchill-outarea': 'Break/Chill-Out Area',
     corridorhallarea: 'Corridor/Hall Area',
     fooddrink: 'Food & Drink',
+    'food&drink': 'Food & Drink',
     foodanddrink: 'Food & Drink',
     toiletarea: 'Toilet Area',
     
@@ -335,8 +337,10 @@ export const translations = {
     // Building Parts and Special Titles
     breakchill: 'Pauze/Ontspanningsruimte',
     breakchilloutarea: 'Pauze/Ontspanningsruimte',
+    'breakchill-outarea': 'Pauze/Ontspanningsruimte',
     corridorhallarea: 'Gang/Hal Gebied',
     fooddrink: 'Eten & Drinken',
+    'food&drink': 'Eten & Drinken',
     foodanddrink: 'Eten & Drinken',
     toiletarea: 'Toiletruimte',
     
