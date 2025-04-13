@@ -38,6 +38,9 @@ export const translations = {
     // Authentication
     login: 'Login',
     logout: 'Logout',
+
+    "food&drinkarea": "Food & Drink",
+    "toilets": "Toilets",
     
     // Survey/Scanning
     startScan: 'Start Scanning',
@@ -369,6 +372,9 @@ export const translations = {
     error: 'Fout',
     tryAgain: 'Probeer Opnieuw',
     send: 'Versturen',
+
+    "food&drinkarea": "Eten & Drinken",
+    "toilets": "Toiletruimte",
     
     // ManualQuestionsModal
     questions: 'Vragen',
