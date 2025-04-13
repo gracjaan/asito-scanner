@@ -56,7 +56,7 @@ export default function FinalReport() {
             // Create a report object from the current survey data
             const report = {
                 id: new Date().getTime().toString(),
-                scope: "Nationale Nederlandse",
+                scope: "Company",
                 date: surveyDate,
                 dateTime: surveyDateTime,
                 status: surveyStatus,

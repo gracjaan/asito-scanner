@@ -67,7 +67,7 @@ export const translations = {
     noDescription: 'No description provided',
     
     // Final Report
-    nationaleNederlandse: 'Nationale Nederlandse',
+    nationaleNederlandse: 'Company',
     buildingAreaObservations: 'Building Area Observations',
     noCompletedQuestions: 'No completed questions found. Please complete at least one question to generate a report.',
     noAnalysisAvailable: 'No analysis available for this question.',
@@ -315,7 +315,7 @@ export const translations = {
     noDescription: 'Geen beschrijving gevonden',
     
     // Final Report
-    nationaleNederlandse: 'Nationale Nederlandse',
+    nationaleNederlandse: 'Company',
     buildingAreaObservations: 'Gebiedsobservaties',
     noCompletedQuestions: 'Geen voltooide vragen gevonden. Voltooi ten minste één vraag om een rapport te genereren.',
     noAnalysisAvailable: 'Geen analyse beschikbaar voor deze vraag.',
