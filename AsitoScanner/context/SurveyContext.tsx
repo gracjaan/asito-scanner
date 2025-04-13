@@ -50,7 +50,7 @@ const SurveyContext = createContext<SurveyContextType>({
   questions: [],
   manualQuestions: [],
   currentQuestionIndex: 0,
-  userName: 'Gracjan Chmielnicki',
+  userName: 'Asito Worker',
   surveyDate: new Date().toLocaleDateString(),
   surveyDateTime: new Date().toLocaleString(),
   surveyStatus: 'in progress',
@@ -431,7 +431,7 @@ export const SurveyProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const [questions, setQuestions] = useState<SurveyQuestion[]>(sampleQuestions);
   const [manualQuestions, setManualQuestions] = useState<ManualQuestion[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [userName, setUserName] = useState('Gracjan Chmielnicki');
+  const [userName, setUserName] = useState('Asito Worker');
   const [surveyDate, setSurveyDate] = useState(new Date().toLocaleDateString());
   const [surveyDateTime, setSurveyDateTime] = useState(new Date().toLocaleString());
   const [surveyStatus, setSurveyStatus] = useState('in progress');
