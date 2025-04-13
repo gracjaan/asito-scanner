@@ -340,7 +340,20 @@ export default function CaptureScreen() {
     setFeedbackMessage(null);
 
     try {
-      const response = await sendImagesToOpenAIWithBase64(currentImages, currentAnalyticalQuestion, language);
+      // Get the translation key for the analytical question
+      const analyticalQuestionKey = getAnalyticalQuestionTranslationKey(currentQuestionId);
+      
+      // Try to get the translated question if available
+      let translatedQuestion = currentAnalyticalQuestion;
+      if (analyticalQuestionKey) {
+        const translatedValue = t(analyticalQuestionKey as any);
+        // Only use the translated value if it's not the same as the key (which happens when no translation exists)
+        if (translatedValue !== analyticalQuestionKey) {
+          translatedQuestion = translatedValue;
+        }
+      }
+      
+      const response = await sendImagesToOpenAIWithBase64(currentImages, translatedQuestion, language);
       setIsAnalyzing(false);
 
       if (response) {
@@ -641,6 +654,31 @@ export default function CaptureScreen() {
     
     const textKey = getTranslationKeyForQuestion(questionId);
     return textKey ? `${textKey}Subtext` : undefined;
+  };
+  
+  // Helper function to get translation key for analytical questions
+  const getAnalyticalQuestionTranslationKey = (questionId: string): string | undefined => {
+    if (!questionId) return undefined;
+    
+    // Remove the location prefix (e.g., "entrance-" from "entrance-doors")
+    const parts = questionId.split('-');
+    if (parts.length < 2) return undefined;
+    
+    // Convert to camelCase for translation keys
+    const location = parts[0];
+    const questionType = parts.slice(1).join('-');
+    
+    // Special cases for specific question types
+    if (questionType === 'as-a-whole') {
+      return `${location}AsAWholeAnalytical`;
+    }
+    
+    if (location === 'toilet' && questionType === 'supplies-harmony') {
+      return 'toiletSuppliesHarmonyAnalytical';
+    }
+    
+    const baseKey = getTranslationKeyForQuestion(questionId);
+    return baseKey ? `${baseKey}Analytical` : undefined;
   };
   
   return (

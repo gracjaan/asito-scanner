@@ -251,6 +251,65 @@ export const translations = {
     toiletSinkSubtext: 'General picture of the whole sink.',
     toiletToilet: 'Toilet',
     toiletToiletSubtext: 'Pictures of the different toilet facilities.',
+    
+    // Analytical Questions - Entrance
+    entranceReceptionAnalytical: 'Is the reception desk tidy, with no clutter on or behind it?',
+    entranceRoomAnalytical: 'The entrance area looks like a whole (furniture, color schemes, interior)? The entrance area looks tidy and neat with tidy tables? The furniture is in good condition (not broken, damaged, paint worn off, etc.)? The space is equipped with plants?',
+    entranceLightsAnalytical: 'Is the entrance area well lit (combination of daylight & artificial lighting, note white/yellow light only)? Are all lights in the entrance area working? Does the entrance area have daylight?',
+    entrancePlantsAnalytical: 'Is the space equipped with plants, and are they in good condition?',
+    entranceFloorsAnalytical: 'Are the floors free from wear spots? Do the floors look clean (note the joints, stripes, footprints, etc.)?',
+    entranceCeilingAnalytical: 'Is the ceiling neat (well painted, no damage)? (Beware, it can also be a glass ceiling).',
+    entranceWallsAnalytical: 'Are the walls free of wear and tear (the paint is good)? Do the walls look clean (free of graffiti, texts and fingerprints)? (Beware, they can also be glass walls).',
+    entranceDoorsAnalytical: 'Do the doors look clean (free of graffiti, texts and fingerprints)? (Doors only count as doors if the door knob is visible. (Beware, they can also be glass doors).',
+
+    // Analytical Questions - Break/Chill-Out Area
+    breakAsAWholeAnalytical: 'The break/chill-out area look like a whole (furniture, color schemes, interior)? The break/chill-out area look tidy and neat with tidy tables? The furniture is in good condition (not broken, damaged, paint worn off, etc.)? The space is equipped with plants?',
+    breakLightingAnalytical: 'Is the break/chill-out area well lit (combination of daylight & artificial lighting, note white/yellow light only)? Are all lights in the break/chill-out area working? Does the break/chill-out area have daylight?',
+    breakFloorsAnalytical: 'Are the floors free from wear spots? Do the floors look clean (note the joints, stripes, footprints, etc.)?',
+    breakCeilingAnalytical: 'Is the ceiling neat (well painted, no damage)? (Beware, it can also be a glass ceiling).',
+    breakWallsAnalytical: 'Are the walls free of wear and tear (the paint is good)? Do the walls look clean (free of graffiti, texts and fingerprints)? (Beware, they can also be glass walls).',
+    breakDoorsAnalytical: 'Do the doors look clean (free of graffiti, texts and fingerprints)? (Doors only count as doors if the door knob is visible. (Beware, they can also be glass doors).',
+    breakTrashAnalytical: 'Is the trash bin full? We consider the bin full when the trash is visibly close to or actually piling from the edge of the trash bin.',
+    
+    // Analytical Questions - Corridors
+    corridorAsAWholeAnalytical: 'The corridors look like a whole (furniture, color schemes, interior)? The hallways look tidy and neat? The furniture is in good condition (not broken, damaged, paint worn off, etc.)? The space is equipped with plants?',
+    corridorStairsAnalytical: 'The stairs look clean (free of streaks, footprints, stains, gum, etc.)? Are the stairs free from wear and tear?',
+    corridorLightingAnalytical: 'Is the corridor well lit (combination of daylight & artificial lighting, note white/yellow light only)? Are all lights in the corridor working? Does the corridor have daylight?',
+    corridorFloorsAnalytical: 'Are the floors free from wear spots? Do the floors look clean (note the joints, stripes, footprints, etc.)?',
+    corridorCeilingAnalytical: 'Is the ceiling neat (well painted, no damage)? (Beware, it can also be a glass ceiling).',
+    corridorWallsAnalytical: 'Are the walls free of wear and tear (the paint is good)? Do the walls look clean (free of graffiti, texts and fingerprints)? (Beware, they can also be glass walls).',
+    corridorDoorsAnalytical: 'Do the doors look clean (free of graffiti, texts and fingerprints)? (Doors only count as doors if the door knob is visible). (Beware, they can also be glass walls).',
+    corridorTrashAnalytical: 'Is the trash bin full? We consider the bin full when the trash is visibly close to or actually piling from the edge of the trash bin.',
+    
+    // Analytical Questions - Workplaces
+    workplacesAsAWholeAnalytical: 'The workplace looks like a whole (furniture, color schemes, interior)? The workplace looks tidy and neat? The furniture is in good condition (no (chairs, desks, etc.) broken, damaged, paint worn off, etc.)? The space is equipped with plants?',
+    workplacesLightingAnalytical: 'Is the workplace well lit (combination of daylight & artificial lighting, note white/yellow light only)? Are all lights in the workplace working? Does the workspace have daylight?',
+    workplacesFloorsAnalytical: 'Are the floors free from wear spots? Do the floors look clean (note the joints, stripes, footprints, etc.)?',
+    workplacesCeilingAnalytical: 'Is the ceiling neat (well painted, no damage)? (Beware, it can also be a glass ceiling).',
+    workplacesWallsAnalytical: 'Are the walls free of wear and tear (the paint is good)? Do the walls look clean (free of graffiti, texts and fingerprints)? (Beware, they can also be glass walls).',
+    workplacesDoorsAnalytical: 'Do the doors look clean (free of graffiti, texts and fingerprints)? (Doors only count as doors if the door knob is visible). (Beware, they can also be glass walls).',
+    workplacesTrashAnalytical: 'Is the trash bin full? We consider the bin full when the trash is visibly close to or actually piling from the edge of the trash bin.',
+    workplacesWorkstationsAnalytical: 'Do the workstations look clean (free from fingerprints, dust, waste, coffee spills, etc.)? Are they tidy and neat (note: clean desks, cables tucked away, piles of papers, etc.)? Are they free of dust (note: open wiring, cupboards, desk)? Do the computers look clean (monitor, keyboard, mouse)?',
+    
+    // Analytical Questions - Toilet Area
+    toiletSuppliesHarmonyAnalytical: 'Have the saint supplies been replenished? Does everything in the toilet area look harmonious (forms a whole, color schemes, etc.)?',
+    toiletLightingAnalytical: 'Is the toilet area well lit (combination of daylight & artificial lighting, note white light only)? Are all lights in the toilet area working? Does the toilet area have some daylight?',
+    toiletFloorsAnalytical: 'Are the floors free from wear spots? Do the floors look clean (note the joints, stripes, footprints, etc.)?',
+    toiletCeilingAnalytical: 'Is the ceiling neat (well painted, no damage)?',
+    toiletWallsAnalytical: 'Are the walls free of wear and tear (the paint is good)? Do the walls look clean (free of graffiti, texts and fingerprints)?',
+    toiletDoorsAnalytical: 'Do the doors look clean (free of graffiti, texts and fingerprints)? (Doors only count as doors if the door knob is visible)',
+    toiletTrashAnalytical: 'Is the trash bin full? We consider the bin full when the trash is visibly close to or actually piling from the trash bin.',
+    toiletSinkAnalytical: 'Does the sink(s) look clean?',
+    toiletToiletAnalytical: 'Do the toilet facilities look clean (both men\'s and women\'s toilets)?',
+    
+    // Food & Drink
+    foodAsAWholeAnalytical: 'The food&drink look like a whole (furniture, color schemes, interior)? The food&drink look tidy and neat with tidy tables? The furniture is in good condition (not broken, damaged, paint worn off, broken chairs, damaged desks, etc.)? The furniture is clean (no litter)? Is the space equipped with plants?',
+    foodLightingAnalytical: 'Is the food&drink area well lit (combination of daylight & artificial lighting, let on white/yellow light only)? Are all lights in the food&drink area working? Does the food&drink area have daylight?',
+    foodFloorsAnalytical: 'Are the floors free from wear spots? Do the floors look clean (note the joints, stripes, footprints, etc.)?',
+    foodCeilingAnalytical: 'Is the ceiling neat (well painted, no damage)? (Beware, it can also be a glass ceiling).',
+    foodWallsAnalytical: 'Are the walls free of wear and tear (the paint is good)? Do the walls look clean (free of graffiti, texts and fingerprints)? (Beware, they can also be glass walls).',
+    foodDoorsAnalytical: 'Do the doors look clean (free of graffiti, texts and fingerprints)? (Doors only count as doors if the door knob is visible. (Beware, they can also be glass doors).',
+    foodTrashAnalytical: 'Is the trash bin full? We consider the bin full when the trash is visibly close to or actually piling from the trash bin.',
   },
   nl: {
     // Common
@@ -502,6 +561,65 @@ export const translations = {
     toiletSinkSubtext: 'Algemene foto van de hele wastafel.',
     toiletToilet: 'Toilet',
     toiletToiletSubtext: 'Foto\'s van de verschillende toiletfaciliteiten.',
+    
+    // Analytical Questions - Entrance
+    entranceReceptionAnalytical: 'Is de receptiebalie opgeruimd, zonder rommel erop of erachter?',
+    entranceRoomAnalytical: 'Ziet de entree er uit als een geheel (meubels, kleurenschema\'s, interieur)? Ziet de entree er netjes uit met opgeruimde tafels? Zijn de meubels in goede staat (niet kapot, beschadigd, verf versleten, etc.)? Is de ruimte uitgerust met planten?',
+    entranceLightsAnalytical: 'Is de entree goed verlicht (combinatie van daglicht & kunstlicht, let op wit/geel licht)? Werken alle lampen in de entree? Heeft de entree daglicht?',
+    entrancePlantsAnalytical: 'Is de ruimte voorzien van planten en zijn ze in goede staat?',
+    entranceFloorsAnalytical: 'Zijn de vloeren vrij van slijtplekken? Zien de vloeren er schoon uit (let op voegen, strepen, voetafdrukken, etc.)?',
+    entranceCeilingAnalytical: 'Is het plafond netjes (goed geschilderd, geen beschadigingen)? (Let op, het kan ook een glazen plafond zijn).',
+    entranceWallsAnalytical: 'Zijn de muren vrij van slijtage (de verf is goed)? Zien de muren er schoon uit (vrij van graffiti, teksten en vingerafdrukken)? (Let op, het kunnen ook glazen wanden zijn).',
+    entranceDoorsAnalytical: 'Zien de deuren er schoon uit (vrij van graffiti, teksten en vingerafdrukken)? (Deuren tellen alleen als deuren als de deurklink zichtbaar is. (Let op, het kunnen ook glazen deuren zijn).',
+
+    // Analytical Questions - Break/Chill-Out Area
+    breakAsAWholeAnalytical: 'Ziet de pauze/ontspanningsruimte er uit als een geheel (meubels, kleurenschema\'s, interieur)? Ziet de pauze/ontspanningsruimte er netjes uit met opgeruimde tafels? Zijn de meubels in goede staat (niet kapot, beschadigd, verf versleten, etc.)? Is de ruimte voorzien van planten?',
+    breakLightingAnalytical: 'Is de pauze/ontspanningsruimte goed verlicht (combinatie van daglicht & kunstlicht, let op wit/geel licht)? Werken alle lampen in de pauze/ontspanningsruimte? Heeft de pauze/ontspanningsruimte daglicht?',
+    breakFloorsAnalytical: 'Zijn de vloeren vrij van slijtplekken? Zien de vloeren er schoon uit (let op voegen, strepen, voetafdrukken, etc.)?',
+    breakCeilingAnalytical: 'Is het plafond netjes (goed geschilderd, geen beschadigingen)? (Let op, het kan ook een glazen plafond zijn).',
+    breakWallsAnalytical: 'Zijn de muren vrij van slijtage (de verf is goed)? Zien de muren er schoon uit (vrij van graffiti, teksten en vingerafdrukken)? (Let op, het kunnen ook glazen wanden zijn).',
+    breakDoorsAnalytical: 'Zien de deuren er schoon uit (vrij van graffiti, teksten en vingerafdrukken)? (Deuren tellen alleen als deuren als de deurklink zichtbaar is. (Let op, het kunnen ook glazen deuren zijn).',
+    breakTrashAnalytical: 'Is de prullenbak vol? We beschouwen de prullenbak als vol wanneer het afval zichtbaar dicht bij of daadwerkelijk opstapelt vanaf de rand van de prullenbak.',
+    
+    // Analytical Questions - Corridors
+    corridorAsAWholeAnalytical: 'Zien de gangen er uit als een geheel (meubels, kleurenschema\'s, interieur)? Zien de gangen er netjes uit? Zijn de meubels in goede staat (niet kapot, beschadigd, verf versleten, etc.)? Is de ruimte voorzien van planten?',
+    corridorStairsAnalytical: 'Zien de trappen er schoon uit (vrij van strepen, voetafdrukken, vlekken, kauwgom, etc.)? Zijn de trappen vrij van slijtage?',
+    corridorLightingAnalytical: 'Is de gang goed verlicht (combinatie van daglicht & kunstlicht, let op wit/geel licht)? Werken alle lampen in de gang? Heeft de gang daglicht?',
+    corridorFloorsAnalytical: 'Zijn de vloeren vrij van slijtplekken? Zien de vloeren er schoon uit (let op voegen, strepen, voetafdrukken, etc.)?',
+    corridorCeilingAnalytical: 'Is het plafond netjes (goed geschilderd, geen beschadigingen)? (Let op, het kan ook een glazen plafond zijn).',
+    corridorWallsAnalytical: 'Zijn de muren vrij van slijtage (de verf is goed)? Zien de muren er schoon uit (vrij van graffiti, teksten en vingerafdrukken)? (Let op, het kunnen ook glazen wanden zijn).',
+    corridorDoorsAnalytical: 'Zien de deuren er schoon uit (vrij van graffiti, teksten en vingerafdrukken)? (Deuren tellen alleen als deuren als de deurklink zichtbaar is). (Let op, het kunnen ook glazen wanden zijn).',
+    corridorTrashAnalytical: 'Is de prullenbak vol? We beschouwen de prullenbak als vol wanneer het afval zichtbaar dicht bij of daadwerkelijk opstapelt vanaf de rand van de prullenbak.',
+    
+    // Analytical Questions - Workplaces
+    workplacesAsAWholeAnalytical: 'Ziet de werkplek er uit als een geheel (meubels, kleurenschema\'s, interieur)? Ziet de werkplek er netjes uit? Zijn de meubels in goede staat (geen (stoelen, bureaus, etc.) kapot, beschadigd, verf versleten, etc.)? Is de ruimte voorzien van planten?',
+    workplacesLightingAnalytical: 'Is de werkplek goed verlicht (combinatie van daglicht & kunstlicht, let op wit/geel licht)? Werken alle lampen op de werkplek? Heeft de werkruimte daglicht?',
+    workplacesFloorsAnalytical: 'Zijn de vloeren vrij van slijtplekken? Zien de vloeren er schoon uit (let op voegen, strepen, voetafdrukken, etc.)?',
+    workplacesCeilingAnalytical: 'Is het plafond netjes (goed geschilderd, geen beschadigingen)? (Let op, het kan ook een glazen plafond zijn).',
+    workplacesWallsAnalytical: 'Zijn de muren vrij van slijtage (de verf is goed)? Zien de muren er schoon uit (vrij van graffiti, teksten en vingerafdrukken)? (Let op, het kunnen ook glazen wanden zijn).',
+    workplacesDoorsAnalytical: 'Zien de deuren er schoon uit (vrij van graffiti, teksten en vingerafdrukken)? (Deuren tellen alleen als deuren als de deurklink zichtbaar is). (Let op, het kunnen ook glazen wanden zijn).',
+    workplacesTrashAnalytical: 'Is de prullenbak vol? We beschouwen de prullenbak als vol wanneer het afval zichtbaar dicht bij of daadwerkelijk opstapelt vanaf de rand van de prullenbak.',
+    workplacesWorkstationsAnalytical: 'Zien de werkplekken er schoon uit (vrij van vingerafdrukken, stof, afval, koffievlekken, etc.)? Zijn ze netjes en opgeruimd (let op: schone bureaus, opgeborgen kabels, stapels papier, etc.)? Zijn ze stofvrij (let op: open bedrading, kasten, bureau)? Zien de computers er schoon uit (monitor, toetsenbord, muis)?',
+    
+    // Analytical Questions - Toilet Area
+    toiletSuppliesHarmonyAnalytical: 'Zijn de sanitaire benodigdheden aangevuld? Ziet alles in het toiletgebied er harmonieus uit (vormt een geheel, kleurenschema\'s, etc.)?',
+    toiletLightingAnalytical: 'Is het toiletgebied goed verlicht (combinatie van daglicht & kunstlicht, let op wit licht)? Werken alle lampen in het toiletgebied? Heeft het toiletgebied wat daglicht?',
+    toiletFloorsAnalytical: 'Zijn de vloeren vrij van slijtplekken? Zien de vloeren er schoon uit (let op voegen, strepen, voetafdrukken, etc.)?',
+    toiletCeilingAnalytical: 'Is het plafond netjes (goed geschilderd, geen beschadigingen)?',
+    toiletWallsAnalytical: 'Zijn de muren vrij van slijtage (de verf is goed)? Zien de muren er schoon uit (vrij van graffiti, teksten en vingerafdrukken)?',
+    toiletDoorsAnalytical: 'Zien de deuren er schoon uit (vrij van graffiti, teksten en vingerafdrukken)? (Deuren tellen alleen als deuren als de deurklink zichtbaar is)',
+    toiletTrashAnalytical: 'Is de prullenbak vol? We beschouwen de prullenbak als vol wanneer het afval zichtbaar dicht bij of daadwerkelijk opstapelt vanaf de prullenbak.',
+    toiletSinkAnalytical: 'Ziet/zien de wastafel(s) er schoon uit?',
+    toiletToiletAnalytical: 'Zien de toiletvoorzieningen er schoon uit (zowel heren- als damestoiletten)?',
+    
+    // Food & Drink
+    foodAsAWholeAnalytical: 'Ziet het eet- en drinkgedeelte er uit als een geheel (meubels, kleurenschema\'s, interieur)? Ziet het eet- en drinkgedeelte er netjes uit met opgeruimde tafels? Zijn de meubels in goede staat (niet kapot, beschadigd, verf versleten, kapotte stoelen, beschadigde bureaus, etc.)? Zijn de meubels schoon (geen rommel)? Is de ruimte voorzien van planten?',
+    foodLightingAnalytical: 'Is het eet- en drinkgedeelte goed verlicht (combinatie van daglicht & kunstlicht, let op wit/geel licht)? Werken alle lampen in het eet- en drinkgedeelte? Heeft het eet- en drinkgedeelte daglicht?',
+    foodFloorsAnalytical: 'Zijn de vloeren vrij van slijtplekken? Zien de vloeren er schoon uit (let op voegen, strepen, voetafdrukken, etc.)?',
+    foodCeilingAnalytical: 'Is het plafond netjes (goed geschilderd, geen beschadigingen)? (Let op, het kan ook een glazen plafond zijn).',
+    foodWallsAnalytical: 'Zijn de muren vrij van slijtage (de verf is goed)? Zien de muren er schoon uit (vrij van graffiti, teksten en vingerafdrukken)? (Let op, het kunnen ook glazen wanden zijn).',
+    foodDoorsAnalytical: 'Zien de deuren er schoon uit (vrij van graffiti, teksten en vingerafdrukken)? (Deuren tellen alleen als deuren als de deurklink zichtbaar is. (Let op, het kunnen ook glazen deuren zijn).',
+    foodTrashAnalytical: 'Is de prullenbak vol? We beschouwen de prullenbak als vol wanneer het afval zichtbaar dicht bij of daadwerkelijk opstapelt vanaf de rand van de prullenbak.',
   }
 };
 

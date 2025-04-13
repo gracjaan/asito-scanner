@@ -177,6 +177,32 @@ export default function FinalReport() {
             );
         }
 
+        // Helper function to get translation key for analytical questions
+        const getAnalyticalQuestionTranslationKey = (questionId: string): string | undefined => {
+            if (!questionId) return undefined;
+            
+            // Remove the location prefix (e.g., "entrance-" from "entrance-doors")
+            const parts = questionId.split('-');
+            if (parts.length < 2) return undefined;
+            
+            // Convert to camelCase for translation keys
+            const location = parts[0];
+            const questionType = parts.slice(1).join('-');
+            
+            // Special cases for specific question types
+            if (questionType === 'as-a-whole') {
+                return `${location}AsAWholeAnalytical`;
+            }
+            
+            if (location === 'toilet' && questionType === 'supplies-harmony') {
+                return 'toiletSuppliesHarmonyAnalytical';
+            }
+            
+            // Generate the base key
+            const baseKey = `${location}${questionType.charAt(0).toUpperCase() + questionType.slice(1)}`;
+            return `${baseKey}Analytical`;
+        };
+
         return (
             <View style={styles.locationsContainer}>
                 {locations.map(location => {
@@ -215,6 +241,19 @@ export default function FinalReport() {
                                 // Get the translation key for this question
                                 const translationKey = getTranslationKey(question.id);
                                 
+                                // Try to get a translation key for the analytical question
+                                const analyticalQuestionKey = getAnalyticalQuestionTranslationKey(question.id);
+                                let analyticalQuestion = question.analyticalQuestion || question.text;
+                                
+                                // If we have a translation key, try to get the translated value
+                                if (analyticalQuestionKey) {
+                                    const translatedValue = t(analyticalQuestionKey as any);
+                                    // Only use the translated value if it's not the same as the key (which happens when no translation exists)
+                                    if (translatedValue !== analyticalQuestionKey) {
+                                        analyticalQuestion = translatedValue;
+                                    }
+                                }
+                                
                                 return (
                                 <View key={question.id} style={styles.questionSection}>
                                     <LocalizedText 
@@ -225,7 +264,7 @@ export default function FinalReport() {
                                     
                                     <View style={styles.analyticalQuestionContainer}>
                                         <LocalizedText style={styles.analyticalQuestionText}>
-                                            {question.analyticalQuestion || question.text}
+                                            {analyticalQuestion}
                                         </LocalizedText>
                                     </View>
 
