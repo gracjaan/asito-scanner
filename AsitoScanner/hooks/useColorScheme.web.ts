@@ -1,21 +1,15 @@
-import { useEffect, useState } from 'react';
-import { useColorScheme as useRNColorScheme } from 'react-native';
-
 /**
- * To support static rendering, this value needs to be re-calculated on the client side for web
+ * This hook is deprecated. The app now only supports light theme.
+ * This hook is kept for backward compatibility and always returns 'light'.
  */
-export function useColorScheme() {
-  const [hasHydrated, setHasHydrated] = useState(false);
 
-  useEffect(() => {
-    setHasHydrated(true);
-  }, []);
-
-  const colorScheme = useRNColorScheme();
-
-  if (hasHydrated) {
-    return colorScheme;
+export function useColorScheme(): 'light' {
+  // Show deprecation warning in development
+  if (process.env.NODE_ENV !== 'production') {
+    console.warn(
+      'useColorScheme is deprecated. The app now only supports light theme.'
+    );
   }
-
+  
   return 'light';
 }

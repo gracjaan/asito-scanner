@@ -49,7 +49,7 @@ export default function TabLayout() {
                         />
                     ),
                     headerStyle: {
-                        backgroundColor: Colors[colorScheme ?? 'light'].background,
+                        backgroundColor: Colors.light.background,
                         borderBottomWidth: 1.5,
                         borderBottomColor: '#FF5A00',
                         height: desiredHeaderHeight,
