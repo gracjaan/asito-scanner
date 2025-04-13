@@ -134,7 +134,11 @@ export default function FinalReport() {
                     
                     return (
                         <View key={part} style={styles.buildingPartSection}>
-                            <LocalizedText style={styles.buildingPartTitle}>{part}</LocalizedText>
+                            <LocalizedText 
+                                style={styles.buildingPartTitle}
+                                textKey={part.toLowerCase().replace(/\//g, '').replace(/ /g, '') as any}
+                                fallback={part}
+                            />
                             
                             <View style={styles.manualQuestionsContainer}>
                                 {partQuestions.map((question, index) => (
@@ -181,13 +185,43 @@ export default function FinalReport() {
                     
                     return (
                         <View key={location} style={styles.locationSection}>
-                            <LocalizedText style={styles.locationTitle}>{location}</LocalizedText>
+                            <LocalizedText 
+                                style={styles.locationTitle} 
+                                textKey={location.toLowerCase().replace(/\//g, '').replace(/ /g, '') as any} 
+                                fallback={location} 
+                            />
                             
-                            {locationQuestions.map((question, index) => (
+                            {locationQuestions.map((question, index) => {
+                                // Get translation key from question ID
+                                const getTranslationKey = (questionId: string): string | undefined => {
+                                    if (!questionId) return undefined;
+                                    const parts = questionId.split('-');
+                                    if (parts.length < 2) return undefined;
+                                    const location = parts[0];
+                                    const questionType = parts.slice(1).join('-');
+                                    
+                                    // Special cases for specific question types
+                                    if (questionType === 'as-a-whole') {
+                                      return `${location}AsAWholeText`;
+                                    }
+                                    
+                                    if (location === 'toilet' && questionType === 'supplies-harmony') {
+                                      return 'toiletSuppliesHarmonyText';
+                                    }
+                                    
+                                    return `${location}${questionType.charAt(0).toUpperCase() + questionType.slice(1)}`;
+                                };
+                                
+                                // Get the translation key for this question
+                                const translationKey = getTranslationKey(question.id);
+                                
+                                return (
                                 <View key={question.id} style={styles.questionSection}>
-                                    <LocalizedText style={styles.questionText}>
-                                        {question.displayText || question.text}
-                                    </LocalizedText>
+                                    <LocalizedText 
+                                        style={styles.questionText}
+                                        textKey={translationKey as any}
+                                        fallback={question.displayText || question.text}
+                                    />
                                     
                                     <View style={styles.analyticalQuestionContainer}>
                                         <LocalizedText style={styles.analyticalQuestionText}>
@@ -207,7 +241,8 @@ export default function FinalReport() {
                                         <View style={styles.questionDivider} />
                                     )}
                                 </View>
-                            ))}
+                                );
+                            })}
                         </View>
                     );
                 })}

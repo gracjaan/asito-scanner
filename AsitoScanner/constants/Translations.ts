@@ -19,6 +19,17 @@ export const translations = {
     switchToDutch: 'Nederlands',
     success: 'Success',
     
+    // Photo Tips
+    analyzingImages: 'Analyzing images...',
+    photoTakingTips: 'Photo Taking Tips',
+    photoTipsIntro: 'To help the AI analyze the images effectively, please follow these tips:',
+    photoTipLighting: 'Ensure the area is well-lit. Avoid shadows or direct glare if possible.',
+    photoTipFocus: 'Make sure the subject of the photo is clear and in focus. Tap the screen to focus if needed.',
+    photoTipFraming: 'Capture the entire relevant item or area mentioned in the question. Don\'t cut off important parts.',
+    photoTipAngles: 'Sometimes, photos from different angles help provide more context. Use the small image slots.',
+    photoTipMainImage: 'Use the large placeholder for the primary, most representative photo.',
+    gotIt: 'Got it!',
+    
     // Authentication
     login: 'Login',
     logout: 'Logout',
@@ -70,6 +81,30 @@ export const translations = {
     workplaces: 'Workplaces',
     toiletArea: 'Toilet Area',
     
+    // Building Parts and Special Titles
+    breakchill: 'Break/Chill-Out Area',
+    breakchilloutarea: 'Break/Chill-Out Area',
+    corridorhallarea: 'Corridor/Hall Area',
+    fooddrink: 'Food & Drink',
+    foodanddrink: 'Food & Drink',
+    toiletarea: 'Toilet Area',
+    
+    // Special Translation Keys for Component Display
+    breakAsAWholeText: 'As a Whole (Furniture, harmony, Tidiness plants, etc.)',
+    breakAsAWholeSubtext: 'Pictures from an open view of the entire space. If plants are present, include a picture of such. Include close view pictures of furniture.',
+    
+    corridorAsAWholeText: 'As a Whole (Furniture, harmony, plants, etc.)',
+    corridorAsAWholeSubtext: 'Pictures from an open view of the entire space. If plants are present, include a picture of such. Include close view pictures of furniture.',
+    
+    foodAsAWholeText: 'As a Whole (Furniture, harmony, Tidiness plants, etc.)',
+    foodAsAWholeSubtext: 'Pictures from an open view of the entire space. If plants are present, include a picture of such. Include close view pictures of furniture.',
+    
+    workplacesAsAWholeText: 'As a Whole (Furniture, harmony, plants, etc.)',
+    workplacesAsAWholeSubtext: 'Pictures from an open view of the entire space. If plants are present, include a picture of such. Include close view pictures of furniture.',
+    
+    toiletSuppliesHarmonyText: 'Supplies & Harmony',
+    toiletSuppliesHarmonySubtext: 'Pictures of the toilet area supplies from mainly close view with some open view of the entire toilet area as well.',
+    
     // Not Found
     oops: 'Oops!',
     screenNotExist: 'This screen doesn\'t exist.',
@@ -103,6 +138,109 @@ export const translations = {
     lookFake: 'Look fake & artificial but can\'t tell for sure',
     yes: 'Yes',
     no: 'No',
+    
+    // Survey Question Texts - Entrance
+    entranceDoors: 'Doors',
+    entranceDoorsSubtext: 'Pictures of the doors from close view and open view. Make sure door knobs and frames are visible!',
+    entranceFloor: 'Floor',
+    entranceFloorSubtext: 'Pictures of the floors from close view and open view.',
+    entranceWalls: 'Walls',
+    entranceWallsSubtext: 'Pictures of the walls from close view and open view. Make sure the wall texture is visible.',
+    entranceCeiling: 'Ceiling',
+    entranceCeilingSubtext: 'Picture of the ceiling with the phone tilted at an angle. Show the edges where the wall ends and the ceiling starts.',
+    entranceOverall: 'Entrance',
+    entranceOverallSubtext: 'Picture(s) of the entrance as a whole from an open view.',
+    entranceReception: 'Reception',
+    entranceReceptionSubtext: 'Picture(s) of the reception area and desk from an open view.',
+    entranceRoom: 'Room',
+    entranceRoomSubtext: 'As a Whole\n(Furniture, harmony, Tidiness plants, etc.) Pictures from an open view of the entire space. If plants are present, include a picture of such. Include close view pictures of furniture.',
+    entranceLights: 'Lights',
+    entranceLightsSubtext: 'Pictures of both natural light (windows and sun reflection) as well as artificial lighting (fixtures).',
+    entrancePlants: 'Plants',
+    entrancePlantsSubtext: '',
+    
+    // Survey Question Texts - Break Area
+    breakAsAWhole: 'As a Whole\n(Furniture, harmony, Tidiness plants, etc.)',
+    breakLighting: 'Lighting',
+    breakLightingSubtext: 'Pictures of both natural light (windows and sun reflection) as well as artificial lighting (fixtures).',
+    breakFloors: 'Floors',
+    breakFloorsSubtext: 'Pictures of the floors from close view and open view.',
+    breakCeiling: 'Ceiling',
+    breakCeilingSubtext: 'Picture of the ceiling with the phone tilted at an angle. Show the edges where the wall ends and the ceiling starts.',
+    breakWalls: 'Walls',
+    breakWallsSubtext: 'Pictures of the walls from close view and open view. Make sure the wall texture is visible.',
+    breakDoors: 'Doors',
+    breakDoorsSubtext: 'Pictures of the doors from close view and open view. Make sure door knobs and frames are visible!',
+    breakTrash: 'Trash',
+    breakTrashSubtext: 'Picture(s) showing the whole trash can(s).',
+    
+    // Survey Question Texts - Food & Drink
+    foodAsAWhole: 'As a Whole\n(Furniture, harmony, Tidiness plants, etc.)',
+    foodLighting: 'Lighting',
+    foodLightingSubtext: 'Pictures of both natural light (windows and sun reflection) as well as artificial lighting (fixtures).',
+    foodFloors: 'Floors',
+    foodFloorsSubtext: 'Pictures of the floors from close view and open view.',
+    foodCeiling: 'Ceiling',
+    foodCeilingSubtext: 'Picture of the ceiling with the phone tilted at an angle. Show the edges where the wall ends and the ceiling starts.',
+    foodWalls: 'Walls',
+    foodWallsSubtext: 'Pictures of the walls from close view and open view. Make sure the wall texture is visible.',
+    foodDoors: 'Doors',
+    foodDoorsSubtext: 'Pictures of the doors from close view and open view. Make sure door knobs and frames are visible!',
+    foodTrash: 'Trash',
+    foodTrashSubtext: 'Picture(s) showing the whole trash can(s).',
+    
+    // Survey Question Texts - Corridor
+    corridorAsAWhole: 'As a Whole\n(Furniture, harmony, plants, etc.)',
+    corridorStairs: 'Stairs',
+    corridorStairsSubtext: 'Pictures of the stairs from close view and open view from both the bottom and the top of the stairs.',
+    corridorLighting: 'Lighting',
+    corridorLightingSubtext: 'Pictures of both natural light (windows and sun reflection) as well as artificial lighting (fixtures).',
+    corridorFloors: 'Floors',
+    corridorFloorsSubtext: 'Pictures of the floors from close view and open view.',
+    corridorCeiling: 'Ceiling',
+    corridorCeilingSubtext: 'Picture of the ceiling with the phone tilted at an angle. Show the edges where the wall ends and the ceiling starts.',
+    corridorWalls: 'Walls',
+    corridorWallsSubtext: 'Pictures of the walls from close view and open view. Make sure the wall texture is visible.',
+    corridorDoors: 'Doors',
+    corridorDoorsSubtext: 'Pictures of the doors from close view and open view. Make sure door knobs and frames are visible!',
+    corridorTrash: 'Trash',
+    corridorTrashSubtext: 'Picture(s) showing the whole trash can(s).',
+    
+    // Survey Question Texts - Workplaces
+    workplacesAsAWhole: 'As a Whole\n(Furniture, harmony, plants, etc.)',
+    workplacesLighting: 'Lighting',
+    workplacesLightingSubtext: 'Pictures of both natural light (windows and sun reflection) as well as artificial lighting (fixtures).',
+    workplacesFloors: 'Floors',
+    workplacesFloorsSubtext: 'Pictures of the floors from close view and open view.',
+    workplacesCeiling: 'Ceiling',
+    workplacesCeilingSubtext: 'Picture of the ceiling with the phone tilted at an angle. Show the edges where the wall ends and the ceiling starts.',
+    workplacesWalls: 'Walls',
+    workplacesWallsSubtext: 'Pictures of the walls from close view and open view. Make sure the wall texture is visible.',
+    workplacesDoors: 'Doors',
+    workplacesDoorsSubtext: 'Pictures of the doors from close view and open view. Make sure door knobs and frames are visible!',
+    workplacesTrash: 'Trash',
+    workplacesTrashSubtext: 'Picture(s) showing the whole trash can(s).',
+    workplacesWorkstations: 'Workstations',
+    workplacesWorkstationsSubtext: 'Pictures of the workstation from both an open view and close view. For a close view, put focus on the tables, computers, monitors, cables, piles of papers.',
+    
+    // Survey Question Texts - Toilet Area
+    toiletSuppliesHarmony: 'Supplies & Harmony',
+    toiletLighting: 'Lighting',
+    toiletLightingSubtext: 'Pictures of both natural light (windows and sun reflection) as well as artificial lighting (fixtures).',
+    toiletFloors: 'Floors',
+    toiletFloorsSubtext: 'Pictures of the floors from close view and open view.',
+    toiletCeiling: 'Ceiling',
+    toiletCeilingSubtext: 'Picture of the ceiling with the phone tilted at an angle. Show the edges where the wall ends and the ceiling starts.',
+    toiletWalls: 'Walls',
+    toiletWallsSubtext: 'Pictures of the walls from close view and open view. Make sure the wall texture is visible.',
+    toiletDoors: 'Doors',
+    toiletDoorsSubtext: 'Pictures of the doors from close view and open view. Make sure door knobs and frames are visible!',
+    toiletTrash: 'Trash',
+    toiletTrashSubtext: 'Picture(s) showing the whole trash can(s).',
+    toiletSink: 'Sink',
+    toiletSinkSubtext: 'General picture of the whole sink.',
+    toiletToilet: 'Toilet',
+    toiletToiletSubtext: 'Pictures of the different toilet facilities.',
   },
   nl: {
     // Common
@@ -121,6 +259,17 @@ export const translations = {
     switchToEnglish: 'English',
     switchToDutch: 'Nederlands',
     success: 'Succes',
+    
+    // Photo Tips
+    analyzingImages: 'Beelden analyseren...',
+    photoTakingTips: 'Foto Tips',
+    photoTipsIntro: 'Om de AI te helpen de afbeeldingen effectief te analyseren, volg deze tips:',
+    photoTipLighting: 'Zorg ervoor dat het gebied goed verlicht is. Vermijd schaduwen of direct zonlicht indien mogelijk.',
+    photoTipFocus: 'Zorg ervoor dat het onderwerp van de foto scherp en in focus is. Tik op het scherm om scherp te stellen indien nodig.',
+    photoTipFraming: 'Leg het hele relevante item of gebied vast dat in de vraag wordt genoemd. Snijd geen belangrijke delen af.',
+    photoTipAngles: 'Soms helpen foto\'s vanuit verschillende hoeken om meer context te bieden. Gebruik de kleine afbeeldingsslots.',
+    photoTipMainImage: 'Gebruik de grote placeholder voor de primaire, meest representatieve foto.',
+    gotIt: 'Begrepen!',
     
     // Authentication
     login: 'Inloggen',
@@ -173,6 +322,30 @@ export const translations = {
     workplaces: 'Werkplekken',
     toiletArea: 'Toiletruimte',
     
+    // Building Parts and Special Titles
+    breakchill: 'Pauze/Ontspanningsruimte',
+    breakchilloutarea: 'Pauze/Ontspanningsruimte',
+    corridorhallarea: 'Gang/Hal Gebied',
+    fooddrink: 'Eten & Drinken',
+    foodanddrink: 'Eten & Drinken',
+    toiletarea: 'Toiletruimte',
+    
+    // Special Translation Keys for Component Display
+    breakAsAWholeText: 'Als geheel (Meubilair, harmonie, Netheid planten, etc.)',
+    breakAsAWholeSubtext: 'Foto\'s vanuit een open zicht van de hele ruimte. Als er planten aanwezig zijn, voeg dan een foto daarvan toe. Voeg dichtbij-foto\'s van meubilair toe.',
+    
+    corridorAsAWholeText: 'Als geheel (Meubilair, harmonie, planten, etc.)',
+    corridorAsAWholeSubtext: 'Foto\'s vanuit een open zicht van de hele ruimte. Als er planten aanwezig zijn, voeg dan een foto daarvan toe. Voeg dichtbij-foto\'s van meubilair toe.',
+    
+    foodAsAWholeText: 'Als geheel (Meubilair, harmonie, Netheid planten, etc.)',
+    foodAsAWholeSubtext: 'Foto\'s vanuit een open zicht van de hele ruimte. Als er planten aanwezig zijn, voeg dan een foto daarvan toe. Voeg dichtbij-foto\'s van meubilair toe.',
+    
+    workplacesAsAWholeText: 'Als geheel (Meubilair, harmonie, plants, etc.)',
+    workplacesAsAWholeSubtext: 'Foto\'s vanuit een open zicht van de hele ruimte. Als er planten aanwezig zijn, voeg dan een foto daarvan toe. Voeg dichtbij-foto\'s van meubilair toe.',
+    
+    toiletSuppliesHarmonyText: 'Benodigdheden & Harmonie',
+    toiletSuppliesHarmonySubtext: 'Foto\'s van de toiletbenodigdheden, voornamelijk van dichtbij, met ook enkele foto\'s van het volledige toiletgebied.',
+    
     // Not Found
     oops: 'Oeps!',
     screenNotExist: 'Dit scherm bestaat niet.',
@@ -206,6 +379,109 @@ export const translations = {
     lookFake: 'Kijk foutig en artificiëel uit, maar je kunt het niet zeker zeggen',
     yes: 'Ja',
     no: 'Nee',
+    
+    // Survey Question Texts - Entrance
+    entranceDoors: 'Deuren',
+    entranceDoorsSubtext: 'Foto\'s van de deuren van dichtbij en van veraf. Zorg ervoor dat deurknoppen en frames zichtbaar zijn!',
+    entranceFloor: 'Vloer',
+    entranceFloorSubtext: 'Foto\'s van de vloeren van dichtbij en van veraf.',
+    entranceWalls: 'Muren',
+    entranceWallsSubtext: 'Foto\'s van de muren van dichtbij en van veraf. Zorg ervoor dat de muurtextuur zichtbaar is.',
+    entranceCeiling: 'Plafond',
+    entranceCeilingSubtext: 'Foto van het plafond met de telefoon in een hoek gehouden. Toon de randen waar de muur eindigt en het plafond begint.',
+    entranceOverall: 'Ingang',
+    entranceOverallSubtext: 'Foto(\'s) van de ingang als geheel vanuit een open zicht.',
+    entranceReception: 'Receptie',
+    entranceReceptionSubtext: 'Foto(\'s) van de receptieruimte en -balie vanuit een open zicht.',
+    entranceRoom: 'Ruimte',
+    entranceRoomSubtext: 'Als geheel\n(Meubilair, harmonie, Netheid planten, etc.) Foto\'s vanuit een open zicht van de hele ruimte. Als er planten aanwezig zijn, voeg dan een foto daarvan toe. Voeg dichtbij-foto\'s van meubilair toe.',
+    entranceLights: 'Verlichting',
+    entranceLightsSubtext: 'Foto\'s van zowel natuurlijk licht (ramen en zonreflectie) als kunstmatige verlichting (armaturen).',
+    entrancePlants: 'Planten',
+    entrancePlantsSubtext: '',
+    
+    // Survey Question Texts - Break Area
+    breakAsAWhole: 'Als geheel\n(Meubilair, harmonie, Netheid planten, etc.)',
+    breakLighting: 'Verlichting',
+    breakLightingSubtext: 'Foto\'s van zowel natuurlijk licht (ramen en zonreflectie) als kunstmatige verlichting (armaturen).',
+    breakFloors: 'Vloeren',
+    breakFloorsSubtext: 'Foto\'s van de vloeren van dichtbij en van veraf.',
+    breakCeiling: 'Plafond',
+    breakCeilingSubtext: 'Foto van het plafond met de telefoon in een hoek gehouden. Toon de randen waar de muur eindigt en het plafond begint.',
+    breakWalls: 'Muren',
+    breakWallsSubtext: 'Foto\'s van de muren van dichtbij en van veraf. Zorg ervoor dat de muurtextuur zichtbaar is.',
+    breakDoors: 'Deuren',
+    breakDoorsSubtext: 'Foto\'s van de deuren van dichtbij en van veraf. Zorg ervoor dat deurknoppen en frames zichtbaar zijn!',
+    breakTrash: 'Afval',
+    breakTrashSubtext: 'Foto(\'s) die de hele prullenbak(ken) tonen.',
+    
+    // Survey Question Texts - Food & Drink
+    foodAsAWhole: 'Als geheel\n(Meubilair, harmonie, Netheid planten, etc.)',
+    foodLighting: 'Verlichting',
+    foodLightingSubtext: 'Foto\'s van zowel natuurlijk licht (ramen en zonreflectie) als kunstmatige verlichting (armaturen).',
+    foodFloors: 'Vloeren',
+    foodFloorsSubtext: 'Foto\'s van de vloeren van dichtbij en van veraf.',
+    foodCeiling: 'Plafond',
+    foodCeilingSubtext: 'Foto van het plafond met de telefoon in een hoek gehouden. Toon de randen waar de muur eindigt en het plafond begint.',
+    foodWalls: 'Muren',
+    foodWallsSubtext: 'Foto\'s van de muren van dichtbij en van veraf. Zorg ervoor dat de muurtextuur zichtbaar is.',
+    foodDoors: 'Deuren',
+    foodDoorsSubtext: 'Foto\'s van de deuren van dichtbij en van veraf. Zorg ervoor dat deurknoppen en frames zichtbaar zijn!',
+    foodTrash: 'Afval',
+    foodTrashSubtext: 'Foto(\'s) die de hele prullenbak(ken) tonen.',
+    
+    // Survey Question Texts - Corridor
+    corridorAsAWhole: 'Als geheel\n(Meubilair, harmonie, planten, etc.)',
+    corridorStairs: 'Trappen',
+    corridorStairsSubtext: 'Foto\'s van de trappen van dichtbij en van veraf, zowel vanaf de onderkant als de bovenkant van de trappen.',
+    corridorLighting: 'Verlichting',
+    corridorLightingSubtext: 'Foto\'s van zowel natuurlijk licht (ramen en zonreflectie) als kunstmatige verlichting (armaturen).',
+    corridorFloors: 'Vloeren',
+    corridorFloorsSubtext: 'Foto\'s van de vloeren van dichtbij en van veraf.',
+    corridorCeiling: 'Plafond',
+    corridorCeilingSubtext: 'Foto van het plafond met de telefoon in een hoek gehouden. Toon de randen waar de muur eindigt en het plafond begint.',
+    corridorWalls: 'Muren',
+    corridorWallsSubtext: 'Foto\'s van de muren van dichtbij en van veraf. Zorg ervoor dat de muurtextuur zichtbaar is.',
+    corridorDoors: 'Deuren',
+    corridorDoorsSubtext: 'Foto\'s van de deuren van dichtbij en van veraf. Zorg ervoor dat deurknoppen en frames zichtbaar zijn!',
+    corridorTrash: 'Afval',
+    corridorTrashSubtext: 'Foto(\'s) die de hele prullenbak(ken) tonen.',
+    
+    // Survey Question Texts - Workplaces
+    workplacesAsAWhole: 'Als geheel\n(Meubilair, harmonie, planten, etc.)',
+    workplacesLighting: 'Verlichting',
+    workplacesLightingSubtext: 'Foto\'s van zowel natuurlijk licht (ramen en zonreflectie) als kunstmatige verlichting (armaturen).',
+    workplacesFloors: 'Vloeren',
+    workplacesFloorsSubtext: 'Foto\'s van de vloeren van dichtbij en van veraf.',
+    workplacesCeiling: 'Plafond',
+    workplacesCeilingSubtext: 'Foto van het plafond met de telefoon in een hoek gehouden. Toon de randen waar de muur eindigt en het plafond begint.',
+    workplacesWalls: 'Muren',
+    workplacesWallsSubtext: 'Foto\'s van de muren van dichtbij en van veraf. Zorg ervoor dat de muurtextuur zichtbaar is.',
+    workplacesDoors: 'Deuren',
+    workplacesDoorsSubtext: 'Foto\'s van de deuren van dichtbij en van veraf. Zorg ervoor dat deurknoppen en frames zichtbaar zijn!',
+    workplacesTrash: 'Afval',
+    workplacesTrashSubtext: 'Foto(\'s) die de hele prullenbak(ken) tonen.',
+    workplacesWorkstations: 'Werkplekken',
+    workplacesWorkstationsSubtext: 'Foto\'s van de werkplek vanuit zowel een open zicht als dichtbij. Voor een dichtbij-zicht, focus op de tafels, computers, monitoren, kabels, stapels papier.',
+    
+    // Survey Question Texts - Toilet Area
+    toiletSuppliesHarmony: 'Benodigdheden & Harmonie',
+    toiletLighting: 'Verlichting',
+    toiletLightingSubtext: 'Foto\'s van zowel natuurlijk licht (ramen en zonreflectie) als kunstmatige verlichting (armaturen).',
+    toiletFloors: 'Vloeren',
+    toiletFloorsSubtext: 'Foto\'s van de vloeren van dichtbij en van veraf.',
+    toiletCeiling: 'Plafond',
+    toiletCeilingSubtext: 'Foto van het plafond met de telefoon in een hoek gehouden. Toon de randen waar de muur eindigt en het plafond begint.',
+    toiletWalls: 'Muren',
+    toiletWallsSubtext: 'Foto\'s van de muren van dichtbij en van veraf. Zorg ervoor dat de muurtextuur zichtbaar is.',
+    toiletDoors: 'Deuren',
+    toiletDoorsSubtext: 'Foto\'s van de deuren van dichtbij en van veraf. Zorg ervoor dat deurknoppen en frames zichtbaar zijn!',
+    toiletTrash: 'Afval',
+    toiletTrashSubtext: 'Foto(\'s) die de hele prullenbak(ken) tonen.',
+    toiletSink: 'Wastafel',
+    toiletSinkSubtext: 'Algemene foto van de hele wastafel.',
+    toiletToilet: 'Toilet',
+    toiletToiletSubtext: 'Foto\'s van de verschillende toiletfaciliteiten.',
   }
 };
 

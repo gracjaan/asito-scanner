@@ -341,12 +341,6 @@ const sampleLocationPrompts: LocationPrompt[] = [
             "subtext": "Pictures of the workstation from both an open view and close view. For a close view, put focus on the tables, computers, monitors, cables, piles of papers.",
             "analyticalQuestion": "Do the workstations look clean (free from fingerprints, dust, waste, coffee spills, etc.)? Are they tidy and neat (note: clean desks, cables tucked away, piles of papers, etc.)? Aethey free of dust (note: open wiring, cupboards, desk)? Do the computers look clean (monitor, keyboard, mouse)?"
           },
-          {
-            "id": "workplaces-doors-2",
-            "text": "Doors",
-            "subtext": "Pictures of the doors from close view and open view. Make sure door knobs and frames are visible!",
-            "analyticalQuestion": "Do the doors look clean (free of graffiti, texts and fingerprints)? (Doors only count as doors if the door knob is visible). (Beware, they can also be glass walls)."
-          }
         ]
       },
       {
@@ -412,16 +406,24 @@ const sampleLocationPrompts: LocationPrompt[] = [
 
 
 const sampleQuestions: SurveyQuestion[] = sampleLocationPrompts.reduce((acc: SurveyQuestion[], locationObj) => {
-  const questionsForLocation = locationObj.questions.map(q => ({
-    id: q.id,
-    text: q.text, // Shown on screen
-    displayText: q.text,
-    subtext: q.subtext,
-    analyticalQuestion: q.analyticalQuestion, // ChatGPT prompt
-    images: [],
-    completed: false,
-    location: locationObj.location,
-  }));
+  const questionsForLocation = locationObj.questions.map(q => {
+    // Generate a camelCase translation key based on the ID
+    const idParts = q.id.split('-');
+    const location = idParts[0];
+    const questionType = idParts.slice(1).join('-');
+    const translationKey = `${location}${questionType.charAt(0).toUpperCase() + questionType.slice(1)}`;
+    
+    return {
+      id: q.id,
+      text: q.text, // Shown on screen
+      displayText: q.text,
+      subtext: q.subtext,
+      analyticalQuestion: q.analyticalQuestion, // ChatGPT prompt
+      images: [],
+      completed: false,
+      location: locationObj.location,
+    };
+  });
   return acc.concat(questionsForLocation);
 }, []);
 

@@ -19,7 +19,9 @@ import { router, useLocalSearchParams } from 'expo-router';
 
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { ThemedText } from '@/components/ThemedText';
+import { LocalizedText } from '@/components/LocalizedText';
 import { useSurvey } from '@/context/SurveyContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { sendImagesToOpenAIWithBase64 } from '@/services/openaiService';
 import { SubmitModal } from '@/components/SubmitModal';
 import { ManualQuestionsModal } from '@/components/ManualQuestionsModal';
@@ -509,7 +511,7 @@ export default function CaptureScreen() {
         <View style={styles.overlayContainer}>
           <View style={styles.overlayContent}>
             <ActivityIndicator size="large" color="#FF5A00" />
-            <ThemedText style={styles.overlayText}>Analyzing images...</ThemedText>
+            <LocalizedText style={styles.overlayText} textKey="analyzingImages" fallback="Analyzing images..." />
             <View style={styles.progressBarContainer}>
               <Animated.View style={[styles.progressBar, { width: progressWidth }]} />
             </View>
@@ -530,21 +532,20 @@ export default function CaptureScreen() {
           <Pressable style={styles.modalContentContainer} onPress={(e) => e.stopPropagation()}>
             <ScrollView contentContainerStyle={styles.modalScrollView}>
               <View style={styles.modalHeader}>
-                <ThemedText style={styles.modalTitle}>Photo Taking Tips</ThemedText>
+                <LocalizedText style={styles.modalTitle} textKey="photoTakingTips" fallback="Photo Taking Tips" />
                 <TouchableOpacity onPress={() => setIsInfoModalVisible(false)} style={styles.modalCloseButtonIcon}>
                   <IconSymbol name="xmark.circle.fill" size={28} color="#666" />
                 </TouchableOpacity>
               </View>
-              <ThemedText style={styles.modalTextIntro}>
-                To help the AI analyze the images effectively, please follow these tips:
-              </ThemedText>
-              <View style={styles.tipItem}><IconSymbol name="lightbulb.fill" size={18} color="#FF5A00" style={styles.tipIcon}/><ThemedText style={styles.modalText}><ThemedText style={styles.boldText}>Good Lighting:</ThemedText> Ensure the area is well-lit. Avoid shadows or direct glare if possible.</ThemedText></View>
-              <View style={styles.tipItem}><IconSymbol name="camera.metering.center.weighted" size={18} color="#FF5A00" style={styles.tipIcon}/><ThemedText style={styles.modalText}><ThemedText style={styles.boldText}>Focus:</ThemedText> Make sure the subject of the photo is clear and in focus. Tap the screen to focus if needed.</ThemedText></View>
-              <View style={styles.tipItem}><IconSymbol name="arrow.up.left.and.down.right.magnifyingglass" size={18} color="#FF5A00" style={styles.tipIcon}/><ThemedText style={styles.modalText}><ThemedText style={styles.boldText}>Framing:</ThemedText> Capture the entire relevant item or area mentioned in the question. Don't cut off important parts.</ThemedText></View>
-              <View style={styles.tipItem}><IconSymbol name="rectangle.stack" size={18} color="#FF5A00" style={styles.tipIcon}/><ThemedText style={styles.modalText}><ThemedText style={styles.boldText}>Multiple Angles (if needed):</ThemedText> Sometimes, photos from different angles help provide more context. Use the small image slots.</ThemedText></View>
-              <View style={styles.tipItem}><IconSymbol name="photo.on.rectangle" size={18} color="#FF5A00" style={styles.tipIcon}/><ThemedText style={styles.modalText}><ThemedText style={styles.boldText}>Main Image:</ThemedText> Use the large placeholder for the primary, most representative photo.</ThemedText></View>
+              <LocalizedText style={styles.modalTextIntro} textKey="photoTipsIntro" fallback="To help the AI analyze the images effectively, please follow these tips:">
+              </LocalizedText>
+              <View style={styles.tipItem}><IconSymbol name="lightbulb.fill" size={18} color="#FF5A00" style={styles.tipIcon}/><LocalizedText style={styles.modalText}><ThemedText style={styles.boldText}>Good Lighting:</ThemedText> <LocalizedText textKey="photoTipLighting" fallback="Ensure the area is well-lit. Avoid shadows or direct glare if possible." useThemedText={false} /></LocalizedText></View>
+              <View style={styles.tipItem}><IconSymbol name="camera.metering.center.weighted" size={18} color="#FF5A00" style={styles.tipIcon}/><LocalizedText style={styles.modalText}><ThemedText style={styles.boldText}>Focus:</ThemedText> <LocalizedText textKey="photoTipFocus" fallback="Make sure the subject of the photo is clear and in focus. Tap the screen to focus if needed." useThemedText={false} /></LocalizedText></View>
+              <View style={styles.tipItem}><IconSymbol name="arrow.up.left.and.down.right.magnifyingglass" size={18} color="#FF5A00" style={styles.tipIcon}/><LocalizedText style={styles.modalText}><ThemedText style={styles.boldText}>Framing:</ThemedText> <LocalizedText textKey="photoTipFraming" fallback="Capture the entire relevant item or area mentioned in the question. Don't cut off important parts." useThemedText={false} /></LocalizedText></View>
+              <View style={styles.tipItem}><IconSymbol name="rectangle.stack" size={18} color="#FF5A00" style={styles.tipIcon}/><LocalizedText style={styles.modalText}><ThemedText style={styles.boldText}>Multiple Angles (if needed):</ThemedText> <LocalizedText textKey="photoTipAngles" fallback="Sometimes, photos from different angles help provide more context. Use the small image slots." useThemedText={false} /></LocalizedText></View>
+              <View style={styles.tipItem}><IconSymbol name="photo.on.rectangle" size={18} color="#FF5A00" style={styles.tipIcon}/><LocalizedText style={styles.modalText}><ThemedText style={styles.boldText}>Main Image:</ThemedText> <LocalizedText textKey="photoTipMainImage" fallback="Use the large placeholder for the primary, most representative photo." useThemedText={false} /></LocalizedText></View>
               <TouchableOpacity style={styles.modalCloseButton} onPress={() => setIsInfoModalVisible(false)}>
-                <ThemedText style={styles.modalCloseButtonText}>Got it!</ThemedText>
+                <LocalizedText style={styles.modalCloseButtonText} textKey="gotIt" fallback="Got it!" />
               </TouchableOpacity>
             </ScrollView>
           </Pressable>
@@ -552,7 +553,53 @@ export default function CaptureScreen() {
       </Modal>
   );
 
-
+  const { t } = useLanguage();
+  
+  // Helper function to get translation key for question text based on question ID
+  const getTranslationKeyForQuestion = (questionId: string): string | undefined => {
+    if (!questionId) return undefined;
+    
+    // Remove the location prefix (e.g., "entrance-" from "entrance-doors")
+    const parts = questionId.split('-');
+    if (parts.length < 2) return undefined;
+    
+    // Convert to camelCase for translation keys
+    const location = parts[0];
+    const questionType = parts.slice(1).join('-');
+    
+    // Special cases for specific question types
+    if (questionType === 'as-a-whole') {
+      return `${location}AsAWholeText`;
+    }
+    
+    if (location === 'toilet' && questionType === 'supplies-harmony') {
+      return 'toiletSuppliesHarmonyText';
+    }
+    
+    return `${location}${questionType.charAt(0).toUpperCase() + questionType.slice(1)}`;
+  };
+  
+  // Helper function to get translation key for question subtext
+  const getSubtextTranslationKey = (questionId: string): string | undefined => {
+    const parts = questionId.split('-');
+    if (parts.length < 2) return undefined;
+    
+    const location = parts[0];
+    const questionType = parts.slice(1).join('-');
+    
+    // Special cases for specific question types
+    if (questionType === 'as-a-whole') {
+      return `${location}AsAWholeSubtext`;
+    }
+    
+    if (location === 'toilet' && questionType === 'supplies-harmony') {
+      return 'toiletSuppliesHarmonySubtext';
+    }
+    
+    const textKey = getTranslationKeyForQuestion(questionId);
+    return textKey ? `${textKey}Subtext` : undefined;
+  };
+  
   return (
       <SafeAreaView style={styles.safeArea} edges={['bottom']}>
         <View style={styles.container}>
@@ -598,17 +645,27 @@ export default function CaptureScreen() {
             {locationQuestions.length > 0 ? (
                 <>
                   <View style={styles.buildingPartHeader}>
-                    <ThemedText style={styles.buildingPartTitle}>
-                      {locationFilterValue}
-                    </ThemedText>
+                    <LocalizedText 
+                      style={styles.buildingPartTitle} 
+                      textKey={locationFilterValue.toLowerCase().replace(/\//g, '').replace(/ /g, '') as any}
+                      fallback={locationFilterValue}
+                    />
                   </View>
                   
                   <View style={styles.mainContent}>
                     <View style={styles.header}>
-                      <ThemedText style={styles.headerText}>{currentDisplayText}</ThemedText>
+                      <LocalizedText 
+                        style={styles.headerText} 
+                        textKey={getTranslationKeyForQuestion(currentQuestionId) as any}
+                        fallback={currentDisplayText}
+                      />
                       {currentSubtext ? (
                           <View style={styles.subtextContainer}>
-                            <ThemedText style={styles.subtextText}>{currentSubtext}</ThemedText>
+                            <LocalizedText 
+                              style={styles.subtextText} 
+                              textKey={getSubtextTranslationKey(currentQuestionId) as any}
+                              fallback={currentSubtext}
+                            />
                           </View>
                       ) : null}
                     </View>
@@ -677,9 +734,7 @@ export default function CaptureScreen() {
                 </>
             ) : (
                 <View style={styles.noQuestionsContainer}>
-                  <ThemedText style={styles.noQuestionsText}>
-                    No questions available for this location.
-                  </ThemedText>
+                  <LocalizedText style={styles.noQuestionsText} textKey="noQuestionsAvailable" fallback="No questions available for this location." />
                 </View>
             )}
           </Animated.View>
