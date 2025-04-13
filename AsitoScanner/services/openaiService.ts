@@ -1,6 +1,7 @@
 import axios from 'axios';
 import * as FileSystem from 'expo-file-system';
 import { OPENAI_API_KEY } from '@/constants/Config';
+import { Language } from '@/constants/Translations';
 
 // Function to encode an image to Base64
 const encodeImage = async (imageUri: string): Promise<string> => {
@@ -23,9 +24,10 @@ export interface OpenAIAnalysisResponse {
 
 export const sendImagesToOpenAIWithBase64 = async (
   imageUris: string[],
-  analyticalQuestion: string
+  analyticalQuestion: string,
+  language: Language = 'en'
 ): Promise<OpenAIAnalysisResponse | null> => {
-  console.log(`Sending ${imageUris.length} images to OpenAI for analysis with question: "${analyticalQuestion}"`);
+  console.log(`Sending ${imageUris.length} images to OpenAI for analysis with question: "${analyticalQuestion}" in language: ${language}`);
 
   if (!imageUris || imageUris.length === 0) {
     console.error("No images provided.");
@@ -48,23 +50,27 @@ export const sendImagesToOpenAIWithBase64 = async (
 
     console.log(`Successfully encoded ${validImages.length} images.`);
 
+    const languageInstruction = language === 'nl' 
+      ? "Respond in Dutch (Nederlands). Je bent een expert gebouwinspectie assistent. " 
+      : "You are an expert building inspector assistant. ";
+
     const structuredPrompt = `
-"You are an expert building inspector assistant. Please analyze the provided images to answer this specific question: '${analyticalQuestion}'
+"${languageInstruction}Please analyze the provided images to answer this specific question: '${analyticalQuestion}'
 Respond with a JSON object in the following format:
 {
-  'answer': 'Please answer with: “{Yes/No}, {state + explanation}”. Where “Yes/No” answers our specific questions. The “state” can be either good or bad and the “explanation” provides general information on the state. If you cannot answer a question properly or there is insufficient detail to assess the questions, answer with: “Cannot answer”. Be specific about what you see in the images.',
-  'Reasoning': Apply reasoning technology, and briefly, concisely, and more in-depth, describe and reason on the factors that lead you to your answer.',
+  'answer': 'Please answer with: "${language === 'nl' ? 'Ja/Nee' : 'Yes/No'}, {state + explanation}". Where "${language === 'nl' ? 'Ja/Nee' : 'Yes/No'}" answers our specific questions. The "state" can be either ${language === 'nl' ? 'goed of slecht' : 'good or bad'} and the "explanation" provides general information on the state. If you cannot answer a question properly or there is insufficient detail to assess the questions, answer with: "${language === 'nl' ? 'Kan niet beantwoorden' : 'Cannot answer'}". Be specific about what you see in the images.',
+  'Reasoning': 'Apply reasoning technology, and briefly, concisely, and more in-depth, describe and reason on the factors that lead you to your answer.',
   'isComplete': true/false (whether the images provide enough information to fully answer the question),
   'suggestedAction': 'If isComplete is false, provide a brief and specific suggestion (maximum 13 words) for what additional photos are needed',
-  'FutureActions': 'If the state is 'bad', briefly and concisely provide a suggestion on how to turn its state to Good.'
+  'FutureActions': 'If the state is ${language === 'nl' ? 'slecht' : 'bad'}, briefly and concisely provide a suggestion on how to turn its state to ${language === 'nl' ? 'Goed' : 'Good'}.'
 }
 
 For the 'answer' field, focus specifically on answering the analytical question. Be thorough but concise.
 For the 'isComplete' field, set to true only if you can confidently answer the question based on the provided images.
 For the 'suggestedAction' field, provide clear guidance on what specific additional photos would help if the current ones are insufficient. Adhere strictly to the maximum 13-word limit.
-For the 'FutureActions' field, If the state is 'bad', briefly and concisely provide a suggestion on how to turn its state to Good.
+For the 'FutureActions' field, If the state is '${language === 'nl' ? 'slecht' : 'bad'}', briefly and concisely provide a suggestion on how to turn its state to ${language === 'nl' ? 'Goed' : 'Good'}.
 
-Ensure your response is ONLY the JSON object with no additional text before or after."
+${language === 'nl' ? 'Zorg ervoor dat je antwoord ALLEEN het JSON-object bevat zonder extra tekst ervoor of erna.' : 'Ensure your response is ONLY the JSON object with no additional text before or after.'}"
 `;
 
     const payload = {
@@ -108,7 +114,9 @@ Ensure your response is ONLY the JSON object with no additional text before or a
       return {
         answer: responseContent,
         isComplete: false,
-        suggestedAction: "Please take clearer photos as the analysis couldn't be properly processed."
+        suggestedAction: language === 'nl' 
+          ? "Maak duidelijkere foto's, de analyse kon niet goed worden verwerkt." 
+          : "Please take clearer photos as the analysis couldn't be properly processed."
       };
     }
   } catch (error: unknown) {

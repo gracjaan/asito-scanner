@@ -138,6 +138,8 @@ export default function CaptureScreen() {
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
   const [isInfoModalVisible, setIsInfoModalVisible] = useState(false);
 
+  const { language, t } = useLanguage();
+
   const progressAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(width)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -326,7 +328,11 @@ export default function CaptureScreen() {
   const handleNext = async () => {
     if (isAnalyzing) return;
     if (currentImages.length === 0) {
-      Alert.alert('No Images', 'Please take at least one photo before proceeding.', [{ text: 'OK' }]);
+      const noImagesTitle = language === 'nl' ? 'Geen Afbeeldingen' : 'No Images';
+      const noImagesMessage = language === 'nl' 
+        ? 'Neem ten minste één foto voordat je verder gaat.'
+        : 'Please take at least one photo before proceeding.';
+      Alert.alert(noImagesTitle, noImagesMessage, [{ text: 'OK' }]);
       return;
     }
 
@@ -334,7 +340,7 @@ export default function CaptureScreen() {
     setFeedbackMessage(null);
 
     try {
-      const response = await sendImagesToOpenAIWithBase64(currentImages, currentAnalyticalQuestion);
+      const response = await sendImagesToOpenAIWithBase64(currentImages, currentAnalyticalQuestion, language);
       setIsAnalyzing(false);
 
       if (response) {
@@ -349,15 +355,19 @@ export default function CaptureScreen() {
             navigateToQuestion(localQuestionIndex + 1);
           }
         } else {
-          setFeedbackMessage(response.suggestedAction || 'Please take more detailed photos.');
+          // Use a fallback translated message if no suggestedAction is provided
+          const fallbackMessage = language === 'nl' 
+            ? 'Neem gedetailleerdere foto\'s voor een betere analyse.' 
+            : 'Please take more detailed photos.';
+          setFeedbackMessage(response.suggestedAction || fallbackMessage);
         }
       } else {
-        Alert.alert('Analysis Failed', 'Received an unexpected response from the analysis service.', [{ text: 'OK' }]);
+        Alert.alert(t('error'), t('unexpectedError'), [{ text: 'OK' }]);
       }
     } catch (error: any) {
       setIsAnalyzing(false);
       console.error('Error sending images to OpenAI:', error);
-      Alert.alert('Analysis Error', `An error occurred: ${error.message || 'Please try again.'}`, [{ text: 'OK' }]);
+      Alert.alert(t('error'), `${t('unexpectedError')} ${error.message || ''}`, [{ text: 'OK' }]);
     }
   };
 
@@ -588,8 +598,6 @@ export default function CaptureScreen() {
       </Modal>
   );
 
-  const { t } = useLanguage();
-  
   // Helper function to get translation key for question text based on question ID
   const getTranslationKeyForQuestion = (questionId: string): string | undefined => {
     if (!questionId) return undefined;
