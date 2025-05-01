@@ -44,7 +44,11 @@ export default function FinalReport() {
         'Corridor/Hall Area',
         'Food&Drink',
         'Workplaces',
-        'Toilet Area'
+        'Toilet Area',
+        'Exterior',
+        'General Interior',
+        'Users',
+        'Cleaning Staff'
     ];
 
     const handleViewAllReports = () => {
@@ -122,11 +126,23 @@ export default function FinalReport() {
         }, {});
 
         // Define the order of building parts
-        const buildingParts = ['Entrance', 'Break/Chill-Out Area', 'Corridor', 'Food&Drink Area', 'Workplaces', 'Toilets', 'Other'];
+        const buildingParts = [
+            'Entrance', 
+            'Break/Chill-Out Area', 
+            'Corridor', 
+            'Food&Drink Area', 
+            'Workplaces', 
+            'Toilets', 
+            'Exterior',
+            'General Interior',
+            'Users',
+            'Cleaning Staff',
+            'Other'
+        ];
 
         return (
             <View style={styles.manualQuestionsSection}>
-                <LocalizedText style={styles.manualQuestionsTitle} textKey="buildingAreaObservations" />
+                <LocalizedText style={styles.manualQuestionsTitle} textKey="manualAssessment" />
                 
                 {buildingParts.map(part => {
                     const partQuestions = groupedQuestions[part];
@@ -318,6 +334,11 @@ export default function FinalReport() {
                 <View style={styles.divider} />
 
                 {renderLocationQuestions()}
+                
+                {hasManualQuestions && (
+                    <View style={styles.sectionSeparator} />
+                )}
+                
                 {renderManualQuestions()}
                 
                 {/* Add some padding at the bottom for the button */}
@@ -505,10 +526,13 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
     },
     manualQuestionsTitle: {
-        fontSize: 20,
+        fontSize: 22,
         fontWeight: 'bold',
         color: '#023866',
         marginBottom: 15,
+        paddingBottom: 8,
+        borderBottomWidth: 2,
+        borderBottomColor: '#FF5A00',
     },
     buildingPartSection: {
         marginBottom: 20,
@@ -548,5 +572,11 @@ const styles = StyleSheet.create({
     noAnswer: {
         color: '#F44336',
         fontWeight: '500',
-    }
+    },
+    sectionSeparator: {
+        height: 1,
+        backgroundColor: '#ddd',
+        marginVertical: 20,
+        marginHorizontal: 20,
+    },
 });

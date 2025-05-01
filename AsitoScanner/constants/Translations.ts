@@ -19,6 +19,10 @@ export const translations = {
     switchToDutch: 'Nederlands',
     success: 'Success',
     
+    // Manual-only sections
+    manualQuestionsOnly: 'This section contains only manual questions.',
+    manualQuestionsLoading: 'Manual questions are loading...',
+    
     // Photo Tips
     analyzingImages: 'Analyzing images...',
     photoTakingTips: 'Photo Taking Tips',
@@ -148,6 +152,58 @@ export const translations = {
     lookFake: 'Look fake & artificial but can\'t tell for sure',
     yes: 'Yes',
     no: 'No',
+    
+    // Manual Questions - Exterior
+    exteriorEntranceVisibility: 'Is the entrance clearly visible from outside?',
+    exteriorSignage: 'Is there clear signage directing visitors to the entrance?',
+    exteriorLighting: 'Is the exterior of the building well-lit?',
+    exteriorCleanliness: 'Is the exterior of the building clean and well-maintained?',
+    exteriorAccessibility: 'Is the building accessible for people with disabilities?',
+    exteriorGreenery: 'Is there greenery or landscaping around the building?',
+    exteriorComments: 'Please note any additional observations about the exterior:',
+    
+    // Manual Questions - General Interior
+    generalLightQuality: 'How would you rate the overall lighting quality in the building?',
+    generalTemperature: 'Is the temperature comfortable throughout the building?',
+    generalNoiseLevel: 'How would you describe the noise level in the building?',
+    generalCleanliness: 'Rate the overall cleanliness of the interior spaces:',
+    generalSafety: 'Are safety features clearly marked (fire exits, extinguishers, etc.)?',
+    generalComments: 'Please provide additional comments about the general interior:',
+    
+    // Manual Questions - Users
+    usersSatisfaction: 'Based on interactions or observations, how satisfied do users seem with the building?',
+    usersFlow: 'Do users appear to navigate the building easily without confusion?',
+    usersSpaceUsage: 'Are all areas of the building being effectively used by occupants?',
+    usersInteraction: 'Do you observe positive interactions between users in communal spaces?',
+    usersAmenities: 'Do users appear to have all necessary amenities for their activities?',
+    usersComments: 'Please note any other observations about building users:',
+    
+    // Manual Questions - Cleaning Staff
+    cleaningVisible: 'Is cleaning staff visible during your inspection?',
+    cleaningEquipment: 'Is cleaning equipment stored neatly and out of the way?',
+    cleaningSchedule: 'Is there a visible cleaning schedule posted anywhere?',
+    cleaningSupplies: 'Are cleaning supplies well-stocked in appropriate areas (bathrooms, etc.)?',
+    cleaningEffectiveness: 'Based on building cleanliness, how effective does the cleaning service appear to be?',
+    cleaningComments: 'Additional observations about cleaning staff or maintenance:',
+    
+    // Additional Option Choices
+    excellent: 'Excellent',
+    good: 'Good',
+    average: 'Average',
+    poor: 'Poor',
+    veryQuiet: 'Very quiet',
+    comfortable: 'Comfortable',
+    somewhatNoisy: 'Somewhat noisy',
+    tooNoisy: 'Too noisy',
+    tooHot: 'Too hot',
+    tooCold: 'Too cold',
+    verySatisfied: 'Very satisfied',
+    satisfied: 'Satisfied',
+    neutral: 'Neutral',
+    dissatisfied: 'Dissatisfied',
+    limitedInteraction: 'Limited interaction',
+    someAreasUnderutilized: 'Some areas underutilized',
+    notVisible: 'Not visible',
     
     // Survey Question Texts - Entrance
     entranceDoors: 'Doors',
@@ -310,6 +366,15 @@ export const translations = {
     foodWallsAnalytical: 'Are the walls free of wear and tear (the paint is good)? Do the walls look clean (free of graffiti, texts and fingerprints)? (Beware, they can also be glass walls).',
     foodDoorsAnalytical: 'Do the doors look clean (free of graffiti, texts and fingerprints)? (Doors only count as doors if the door knob is visible. (Beware, they can also be glass doors).',
     foodTrashAnalytical: 'Is the trash bin full? We consider the bin full when the trash is visibly close to or actually piling from the trash bin.',
+    
+    // New manual-only sections
+    exterior: 'Exterior',
+    generalinterior: 'General Interior',
+    users: 'Users',
+    cleaningstaff: 'Cleaning Staff',
+    
+    // Manual Assessment
+    manualAssessment: 'Manual Assessment Observations',
   },
   nl: {
     // Common
@@ -328,6 +393,10 @@ export const translations = {
     switchToEnglish: 'English',
     switchToDutch: 'Nederlands',
     success: 'Succes',
+    
+    // Manual-only sections
+    manualQuestionsOnly: 'Deze sectie bevat alleen handmatige vragen.',
+    manualQuestionsLoading: 'Handmatige vragen worden geladen...',
     
     // Photo Tips
     analyzingImages: 'Beelden analyseren...',
@@ -348,6 +417,9 @@ export const translations = {
     // Authentication
     login: 'Inloggen',
     logout: 'Uitloggen',
+
+    "food&drinkarea": "Eten & Drinken",
+    "toilets": "Toiletruimte",
     
     // Survey/Scanning
     startScan: 'Start Scan',
@@ -431,9 +503,6 @@ export const translations = {
     error: 'Fout',
     tryAgain: 'Probeer Opnieuw',
     send: 'Versturen',
-
-    "food&drinkarea": "Eten & Drinken",
-    "toilets": "Toiletruimte",
     
     // ManualQuestionsModal
     questions: 'Vragen',
@@ -453,11 +522,63 @@ export const translations = {
     airQuality: 'Voelt de luchtkwaliteit er lekker aan? (niet mustig of stofig)?',
     smell: 'Voelt het er lekker aan om de {area} rondom?',
     notableFindings: 'Plaats hier enkele opvallende ontdekkingen voor de {area}:',
-    toiletFragrance: 'Wordt er gewichtelijk gebruik gemaakt van geur? (dispensers, kaarsen, etc.)',
+    toiletFragrance: 'Is fragrance bewust gebruikt? (dispensers, kaarsen, etc.)',
     lookReal: 'Kijk echt uit, maar je kunt het niet zeker zeggen',
     lookFake: 'Kijk foutig en artificiëel uit, maar je kunt het niet zeker zeggen',
     yes: 'Ja',
     no: 'Nee',
+    
+    // Manual Questions - Exterior
+    exteriorEntranceVisibility: 'Is de ingang duidelijk zichtbaar van buitenaf?',
+    exteriorSignage: 'Is er duidelijke bewegwijzering die bezoekers naar de ingang leidt?',
+    exteriorLighting: 'Is de buitenkant van het gebouw goed verlicht?',
+    exteriorCleanliness: 'Is de buitenkant van het gebouw schoon en goed onderhouden?',
+    exteriorAccessibility: 'Is het gebouw toegankelijk voor mensen met een beperking?',
+    exteriorGreenery: 'Is er groen of landschapsarchitectuur rond het gebouw?',
+    exteriorComments: 'Noteer eventuele aanvullende observaties over de buitenkant:',
+    
+    // Manual Questions - General Interior
+    generalLightQuality: 'Hoe zou u de algemene lichtkwaliteit in het gebouw beoordelen?',
+    generalTemperature: 'Is de temperatuur comfortabel in het hele gebouw?',
+    generalNoiseLevel: 'Hoe zou u het geluidsniveau in het gebouw omschrijven?',
+    generalCleanliness: 'Beoordeel de algemene netheid van de binnenruimtes:',
+    generalSafety: 'Zijn veiligheidsvoorzieningen duidelijk aangegeven (nooduitgangen, brandblussers, enz.)?',
+    generalComments: 'Geef aanvullende opmerkingen over het algemene interieur:',
+    
+    // Manual Questions - Users
+    usersSatisfaction: 'Op basis van interacties of observaties, hoe tevreden lijken gebruikers met het gebouw?',
+    usersFlow: 'Lijken gebruikers gemakkelijk door het gebouw te navigeren zonder verwarring?',
+    usersSpaceUsage: 'Worden alle gebieden van het gebouw effectief gebruikt door de bewoners?',
+    usersInteraction: 'Observeert u positieve interacties tussen gebruikers in gemeenschappelijke ruimtes?',
+    usersAmenities: 'Lijken gebruikers alle nodige voorzieningen te hebben voor hun activiteiten?',
+    usersComments: 'Noteer eventuele andere observaties over gebouwgebruikers:',
+    
+    // Manual Questions - Cleaning Staff
+    cleaningVisible: 'Is het schoonmaakpersoneel zichtbaar tijdens uw inspectie?',
+    cleaningEquipment: 'Wordt schoonmaakmateriaal netjes en uit de weg opgeborgen?',
+    cleaningSchedule: 'Is er ergens een zichtbaar schoonmaakschema opgehangen?',
+    cleaningSupplies: 'Zijn schoonmaakmiddelen goed voorradig in de juiste ruimtes (badkamers, enz.)?',
+    cleaningEffectiveness: 'Gebaseerd op de netheid van het gebouw, hoe effectief lijkt de schoonmaakdienst te zijn?',
+    cleaningComments: 'Aanvullende observaties over schoonmaakpersoneel of onderhoud:',
+    
+    // Additional Option Choices
+    excellent: 'Uitstekend',
+    good: 'Goed',
+    average: 'Gemiddeld',
+    poor: 'Slecht',
+    veryQuiet: 'Zeer rustig',
+    comfortable: 'Comfortabel',
+    somewhatNoisy: 'Enigszins rumoerig',
+    tooNoisy: 'Te rumoerig',
+    tooHot: 'Te warm',
+    tooCold: 'Te koud',
+    verySatisfied: 'Zeer tevreden',
+    satisfied: 'Tevreden',
+    neutral: 'Neutraal',
+    dissatisfied: 'Ontevreden',
+    limitedInteraction: 'Beperkte interactie',
+    someAreasUnderutilized: 'Sommige gebieden onderbenut',
+    notVisible: 'Niet zichtbaar',
     
     // Survey Question Texts - Entrance
     entranceDoors: 'Deuren',
@@ -620,6 +741,15 @@ export const translations = {
     foodWallsAnalytical: 'Zijn de muren vrij van slijtage (de verf is goed)? Zien de muren er schoon uit (vrij van graffiti, teksten en vingerafdrukken)? (Let op, het kunnen ook glazen wanden zijn).',
     foodDoorsAnalytical: 'Zien de deuren er schoon uit (vrij van graffiti, teksten en vingerafdrukken)? (Deuren tellen alleen als deuren als de deurklink zichtbaar is. (Let op, het kunnen ook glazen deuren zijn).',
     foodTrashAnalytical: 'Is de prullenbak vol? We beschouwen de prullenbak als vol wanneer het afval zichtbaar dicht bij of daadwerkelijk opstapelt vanaf de rand van de prullenbak.',
+    
+    // New manual-only sections
+    exterior: 'Exterieur',
+    generalinterior: 'Algemeen Interieur',
+    users: 'Gebruikers',
+    cleaningstaff: 'Schoonmaakpersoneel',
+    
+    // Manual Assessment
+    manualAssessment: 'Manual Assessment Observations',
   }
 };
 

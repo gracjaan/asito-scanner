@@ -45,12 +45,24 @@ const BUILDING_PARTS = [
   'Corridor/Hall Area',
   'Food&Drink',
   'Workplaces',
-  'Toilet Area'
+  'Toilet Area',
+  'Exterior',
+  'General Interior',
+  'Users',
+  'Cleaning Staff'
+];
+
+// Define manual-only sections that don't require photo capture
+const MANUAL_ONLY_SECTIONS = [
+  'Exterior',
+  'General Interior',
+  'Users',
+  'Cleaning Staff'
 ];
 
 // Define location types
-type LocationType = 'Entrance' | 'Break/Chill-Out Area' | 'Corridor/Hall Area' | 'Food&Drink' | 'Workplaces' | 'Toilet Area';
-type BuildingPartType = 'Entrance' | 'Break/Chill-Out Area' | 'Corridor' | 'Food&Drink Area' | 'Workplaces' | 'Toilets';
+type LocationType = 'Entrance' | 'Break/Chill-Out Area' | 'Corridor/Hall Area' | 'Food&Drink' | 'Workplaces' | 'Toilet Area' | 'Exterior' | 'General Interior' | 'Users' | 'Cleaning Staff';
+type BuildingPartType = 'Entrance' | 'Break/Chill-Out Area' | 'Corridor' | 'Food&Drink Area' | 'Workplaces' | 'Toilets' | 'Exterior' | 'General Interior' | 'Users' | 'Cleaning Staff';
 
 // Define a function to normalize location values
 const normalizeBuildingPart = (location: string): string => {
@@ -63,7 +75,11 @@ const normalizeBuildingPart = (location: string): string => {
     'Food&Drink Area': 'Food&Drink Area',
     'Workplaces': 'Workplaces',
     'Toilet Area': 'Toilets',
-    'Toilets': 'Toilets'
+    'Toilets': 'Toilets',
+    'Exterior': 'Exterior',
+    'General Interior': 'General Interior',
+    'Users': 'Users',
+    'Cleaning Staff': 'Cleaning Staff'
   };
   
   // Log the mapping process
@@ -79,6 +95,10 @@ const LOCATION_TO_BUILDING_PART: Record<LocationType, BuildingPartType> = {
   'Food&Drink': 'Food&Drink Area',
   'Workplaces': 'Workplaces',
   'Toilet Area': 'Toilets',
+  'Exterior': 'Exterior',
+  'General Interior': 'General Interior',
+  'Users': 'Users',
+  'Cleaning Staff': 'Cleaning Staff'
 };
 
 export default function CaptureScreen() {
@@ -104,6 +124,8 @@ export default function CaptureScreen() {
     setManualQuestions,
     manualQuestions
   } = useSurvey();
+
+  const isManualOnlySection = MANUAL_ONLY_SECTIONS.includes(locationFilterValue);
 
   const locationQuestions = questions.filter(
       q => q.location?.toLowerCase() === locationFilterValue.toLowerCase()
@@ -310,16 +332,19 @@ export default function CaptureScreen() {
   };
 
   const showManualQuestionsForCurrentPart = () => {
-    // Map the locationFilterValue to the corresponding buildingPart name used in manual questions
+    // Get the correct building part name for storage
     const buildingPartForManualQuestions = normalizeBuildingPart(locationFilterValue);
     
     console.log(`Current location filter value: "${locationFilterValue}"`);
     console.log(`Mapped to building part: "${buildingPartForManualQuestions}"`);
+    console.log(`Is this a manual-only section: ${isManualOnlySection}`);
     
     // Filter manual questions just for current building part
     const partQuestions = manualQuestions.filter(q => 
       q.buildingPart === buildingPartForManualQuestions
     );
+    
+    console.log(`Found ${partQuestions.length} manual questions for this part`);
     
     setCurrentManualQuestions(partQuestions);
     setShowManualQuestionsModal(true);
@@ -455,8 +480,24 @@ export default function CaptureScreen() {
   };
 
   const handleManualQuestionsCancel = () => {
-    // Return to current questions without saving
-    setShowManualQuestionsModal(false);
+    // For manual-only sections, we need special handling
+    if (isManualOnlySection) {
+      // If we canceled a manual-only section, we should go back to the previous part
+      const currentIndex = BUILDING_PARTS.indexOf(locationFilterValue);
+      
+      if (currentIndex > 0) {
+        // Go back to the previous section
+        const previousPart = BUILDING_PARTS[currentIndex - 1];
+        console.log(`Manual-only section canceled, returning to previous part: ${previousPart}`);
+        router.push(`/home/capture?location=${encodeURIComponent(previousPart)}`);
+      } else {
+        // If this is the first section (shouldn't happen), just close the modal
+        setShowManualQuestionsModal(false);
+      }
+    } else {
+      // For regular sections, just close the modal
+      setShowManualQuestionsModal(false);
+    }
   };
 
   const generateFinalReport = async () => {
@@ -681,6 +722,17 @@ export default function CaptureScreen() {
     return baseKey ? `${baseKey}Analytical` : undefined;
   };
   
+  useEffect(() => {
+    // If this is a manual-only section, directly show the manual questions
+    if (isManualOnlySection) {
+      showManualQuestionsForCurrentPart();
+    } else if (locationQuestions.length === 0) {
+      // If there are no questions for this section, automatically move to the next one
+      console.log(`No questions found for ${locationFilterValue}, skipping to next section`);
+      moveToNextBuildingPart();
+    }
+  }, [locationFilterValue, isManualOnlySection, locationQuestions.length]);
+
   return (
       <SafeAreaView style={styles.safeArea} edges={['bottom']}>
         <View style={styles.container}>
@@ -689,18 +741,18 @@ export default function CaptureScreen() {
           <TouchableOpacity
               style={styles.skipIconButton}
               onPress={skipQuestion}
-              disabled={isAnalyzing}
+              disabled={isAnalyzing || isManualOnlySection}
           >
-            <IconSymbol name="forward.fill" size={28} color={isAnalyzing ? '#ccc' : '#666'} />
+            <IconSymbol name="forward.fill" size={28} color={(isAnalyzing || isManualOnlySection) ? '#ccc' : '#666'} />
           </TouchableOpacity>
 
           {/* Info Button */}
           <TouchableOpacity
               style={styles.infoButton}
               onPress={() => setIsInfoModalVisible(true)}
-              disabled={isAnalyzing}
+              disabled={isAnalyzing || isManualOnlySection}
           >
-            <IconSymbol name="info.circle" size={28} color={isAnalyzing ? '#ccc' : '#023866'} />
+            <IconSymbol name="info.circle" size={28} color={(isAnalyzing || isManualOnlySection) ? '#ccc' : '#023866'} />
           </TouchableOpacity>
 
           <SubmitModal 
@@ -723,7 +775,30 @@ export default function CaptureScreen() {
           <Animated.View
               style={[ styles.contentContainer, { transform: [{ translateX: slideAnim }], opacity: fadeAnim } ]}
           >
-            {locationQuestions.length > 0 ? (
+            {isManualOnlySection ? (
+              <View style={styles.manualOnlySectionContainer}>
+                <View style={styles.buildingPartHeader}>
+                  <LocalizedText 
+                    style={styles.buildingPartTitle} 
+                    textKey={locationFilterValue.toLowerCase().replace(/\//g, '').replace(/ /g, '') as any}
+                    fallback={locationFilterValue}
+                  />
+                </View>
+                <View style={styles.manualOnlyContent}>
+                  <IconSymbol name="clipboard.fill" size={80} color="#023866" />
+                  <LocalizedText 
+                    style={styles.manualOnlyText} 
+                    textKey="manualQuestionsOnly"
+                    fallback="This section contains only manual questions."
+                  />
+                  <LocalizedText 
+                    style={styles.manualOnlySubtext} 
+                    textKey="manualQuestionsLoading"
+                    fallback="Manual questions are loading..."
+                  />
+                </View>
+              </View>
+            ) : locationQuestions.length > 0 ? (
                 <>
                   <View style={styles.buildingPartHeader}>
                     <LocalizedText 
@@ -1175,5 +1250,28 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: '#023866',
+  },
+  manualOnlySectionContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  manualOnlyContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  manualOnlyText: {
+    fontSize: 16,
+    color: '#333',
+    textAlign: 'center',
+    marginTop: 20,
+  },
+  manualOnlySubtext: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    marginTop: 10,
   },
 });

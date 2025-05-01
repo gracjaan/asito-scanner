@@ -445,6 +445,220 @@ export function ManualQuestionsModal({ visible, onCancel, onSubmit, buildingPart
       areaName: 'toilet area',
       answer: '',
       buildingPart: 'Toilets'
+    },
+
+    // Exterior
+    {
+      id: 'exterior-entrance-visibility',
+      question: 'Is the entrance clearly visible from outside?',
+      translationKey: 'exteriorEntranceVisibility',
+      answer: '',
+      required: true,
+      buildingPart: 'Exterior',
+      options: [YES, NO]
+    },
+    {
+      id: 'exterior-signage',
+      question: 'Is there clear signage directing visitors to the entrance?',
+      translationKey: 'exteriorSignage',
+      answer: '',
+      required: true,
+      buildingPart: 'Exterior',
+      options: [YES, NO]
+    },
+    {
+      id: 'exterior-lighting',
+      question: 'Is the exterior of the building well-lit?',
+      translationKey: 'exteriorLighting',
+      answer: '',
+      buildingPart: 'Exterior',
+      options: [YES, NO]
+    },
+    {
+      id: 'exterior-cleanliness',
+      question: 'Is the exterior of the building clean and well-maintained?',
+      translationKey: 'exteriorCleanliness',
+      answer: '',
+      buildingPart: 'Exterior',
+      options: [YES, NO]
+    },
+    {
+      id: 'exterior-accessibility',
+      question: 'Is the building accessible for people with disabilities?',
+      translationKey: 'exteriorAccessibility',
+      answer: '',
+      required: true,
+      buildingPart: 'Exterior',
+      options: [YES, NO]
+    },
+    {
+      id: 'exterior-greenery',
+      question: 'Is there greenery or landscaping around the building?',
+      translationKey: 'exteriorGreenery',
+      answer: '',
+      buildingPart: 'Exterior',
+      options: [YES, NO]
+    },
+    {
+      id: 'exterior-comments',
+      question: 'Please note any additional observations about the exterior:',
+      translationKey: 'exteriorComments',
+      answer: '',
+      buildingPart: 'Exterior'
+    },
+
+    // General Interior
+    {
+      id: 'general-light-quality',
+      question: 'How would you rate the overall lighting quality in the building?',
+      translationKey: 'generalLightQuality',
+      answer: '',
+      required: true,
+      buildingPart: 'General Interior',
+      options: [t('excellent' as any), t('good' as any), t('average' as any), t('poor' as any)]
+    },
+    {
+      id: 'general-temperature',
+      question: 'Is the temperature comfortable throughout the building?',
+      translationKey: 'generalTemperature',
+      answer: '',
+      required: true,
+      buildingPart: 'General Interior',
+      options: [YES, NO, t('tooHot' as any), t('tooCold' as any)]
+    },
+    {
+      id: 'general-noise-level',
+      question: 'How would you describe the noise level in the building?',
+      translationKey: 'generalNoiseLevel',
+      answer: '',
+      buildingPart: 'General Interior',
+      options: [t('veryQuiet' as any), t('comfortable' as any), t('somewhatNoisy' as any), t('tooNoisy' as any)]
+    },
+    {
+      id: 'general-cleanliness',
+      question: 'Rate the overall cleanliness of the interior spaces:',
+      translationKey: 'generalCleanliness',
+      answer: '',
+      required: true,
+      buildingPart: 'General Interior',
+      options: [t('excellent' as any), t('good' as any), t('average' as any), t('poor' as any)]
+    },
+    {
+      id: 'general-safety',
+      question: 'Are safety features clearly marked (fire exits, extinguishers, etc.)?',
+      translationKey: 'generalSafety',
+      answer: '',
+      buildingPart: 'General Interior',
+      options: [YES, NO]
+    },
+    {
+      id: 'general-comments',
+      question: 'Please provide additional comments about the general interior:',
+      translationKey: 'generalComments',
+      answer: '',
+      buildingPart: 'General Interior'
+    },
+
+    // Users
+    {
+      id: 'users-satisfaction',
+      question: 'Based on interactions or observations, how satisfied do users seem with the building?',
+      translationKey: 'usersSatisfaction',
+      answer: '',
+      required: true,
+      buildingPart: 'Users',
+      options: [t('verySatisfied' as any), t('satisfied' as any), t('neutral' as any), t('dissatisfied' as any)]
+    },
+    {
+      id: 'users-flow',
+      question: 'Do users appear to navigate the building easily without confusion?',
+      translationKey: 'usersFlow',
+      answer: '',
+      required: true,
+      buildingPart: 'Users',
+      options: [YES, NO]
+    },
+    {
+      id: 'users-space-usage',
+      question: 'Are all areas of the building being effectively used by occupants?',
+      translationKey: 'usersSpaceUsage',
+      answer: '',
+      buildingPart: 'Users',
+      options: [YES, NO, t('someAreasUnderutilized' as any)]
+    },
+    {
+      id: 'users-interaction',
+      question: 'Do you observe positive interactions between users in communal spaces?',
+      translationKey: 'usersInteraction',
+      answer: '',
+      buildingPart: 'Users',
+      options: [YES, NO, t('limitedInteraction' as any)]
+    },
+    {
+      id: 'users-amenities',
+      question: 'Do users appear to have all necessary amenities for their activities?',
+      translationKey: 'usersAmenities',
+      answer: '',
+      buildingPart: 'Users',
+      options: [YES, NO]
+    },
+    {
+      id: 'users-comments',
+      question: 'Please note any other observations about building users:',
+      translationKey: 'usersComments',
+      answer: '',
+      buildingPart: 'Users'
+    },
+
+    // Cleaning Staff
+    {
+      id: 'cleaning-visible',
+      question: 'Is cleaning staff visible during your inspection?',
+      translationKey: 'cleaningVisible',
+      answer: '',
+      required: true,
+      buildingPart: 'Cleaning Staff',
+      options: [YES, NO]
+    },
+    {
+      id: 'cleaning-equipment',
+      question: 'Is cleaning equipment stored neatly and out of the way?',
+      translationKey: 'cleaningEquipment',
+      answer: '',
+      buildingPart: 'Cleaning Staff',
+      options: [YES, NO, t('notVisible' as any)]
+    },
+    {
+      id: 'cleaning-schedule',
+      question: 'Is there a visible cleaning schedule posted anywhere?',
+      translationKey: 'cleaningSchedule',
+      answer: '',
+      buildingPart: 'Cleaning Staff',
+      options: [YES, NO]
+    },
+    {
+      id: 'cleaning-supplies',
+      question: 'Are cleaning supplies well-stocked in appropriate areas (bathrooms, etc.)?',
+      translationKey: 'cleaningSupplies',
+      answer: '',
+      required: true,
+      buildingPart: 'Cleaning Staff',
+      options: [YES, NO]
+    },
+    {
+      id: 'cleaning-effectiveness',
+      question: 'Based on building cleanliness, how effective does the cleaning service appear to be?',
+      translationKey: 'cleaningEffectiveness',
+      answer: '',
+      buildingPart: 'Cleaning Staff',
+      options: [t('excellent' as any), t('good' as any), t('average' as any), t('poor' as any)]
+    },
+    {
+      id: 'cleaning-comments',
+      question: 'Additional observations about cleaning staff or maintenance:',
+      translationKey: 'cleaningComments',
+      answer: '',
+      buildingPart: 'Cleaning Staff'
     }
   ];
 
@@ -480,7 +694,11 @@ export function ManualQuestionsModal({ visible, onCancel, onSubmit, buildingPart
       'Food&Drink Area': 'Food&Drink Area',
       'Workplaces': 'Workplaces',
       'Toilet Area': 'Toilets',
-      'Toilets': 'Toilets'
+      'Toilets': 'Toilets',
+      'Exterior': 'Exterior',
+      'General Interior': 'General Interior',
+      'Users': 'Users',
+      'Cleaning Staff': 'Cleaning Staff'
     };
     
     console.log(`Normalizing building part: "${part}" → "${mappings[part] || part}"`);
