@@ -1,6 +1,6 @@
 import { Resend } from 'resend';
 import { Report } from './storageService';
-import { RESEND_API_KEY } from '@/constants/Config';
+import { RESEND_API_KEY } from '../expo-env.d';
 
 // Initialize Resend with API key
 const resend = new Resend(RESEND_API_KEY);

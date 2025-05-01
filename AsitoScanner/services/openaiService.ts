@@ -1,6 +1,6 @@
 import axios from 'axios';
 import * as FileSystem from 'expo-file-system';
-import { OPENAI_API_KEY } from '@/constants/Config';
+import { OPENAI_API_KEY } from '../expo-env.d';
 import { Language } from '@/constants/Translations';
 
 // Function to encode an image to Base64
