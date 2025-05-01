@@ -20,6 +20,7 @@ const MAPPING = {
   'checkmark': 'check',
   'xmark': 'close',
   'envelope': 'email',
+  'globe': 'language',
 } as Partial<
   Record<
     import('expo-symbols').SymbolViewProps['name'],
